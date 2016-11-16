@@ -38,4 +38,14 @@ class Login
         $this->username =$u;
         $this->password = $p;
     }
+
+    //convert this object to json.
+    public function toJSON(){
+        return json_encode(array('credentials', array(
+            'institution' => $this->institution,
+            'username' => $this->username,
+            'password' => $this->password
+
+        )));
+    }
 }

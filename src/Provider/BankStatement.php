@@ -12,6 +12,7 @@ use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Logout;
 use BankStatement\Models\BankStatementsInterface;
 use GuzzleHttp\Client;
+use GuzzleHttp\Cookie\CookieJar;
 
 class BankStatement implements BankStatementsInterface
 {
@@ -21,6 +22,8 @@ class BankStatement implements BankStatementsInterface
     private $isTest;
 
     private $client;
+
+    private $cookieJar;
 
     /**
      * @var string
@@ -36,27 +39,44 @@ class BankStatement implements BankStatementsInterface
     {
         $this->APIKey = $apikey;
         $this->isTest = $test;
+        $this->cookieJar = new CookieJar();
     }
 
-    public function buildQuery($input){
+    //builds Guzzle Client and returns it
+    public function buildClient(){
 
+        $url = $this->isTest ? self::ENDPOINT_URL_TEST : self::ENDPOINT_URL;
+        $client = new Client(['base_uri' => $url]);
+        
+        return $client;
     }
 
-    public function executeQuery($query){
+    public function executeQuery($location, $body){
+
+        //build the Http client
+        $this->client = $this->buildClient();
+
+        //make the call
+        return $this->client->request('GET', $location, [
+            'headers' => [
+                'X-API-KEY' => $this->APIKey,
+                'Content-Type'     => 'application/json'
+            ],
+            'body' =>[
+                $body
+            ]
+        ]);
+
 
         //add any other headers to the query.
-        $query = $this->buildQuery($query);
     }
 
     public function login(Login $login)
     {
 
-        $query = sprintf(
-            $this->isTest ? self::ENDPOINT_URL_TEST : self::ENDPOINT_URL,
-            rawurlencode($login)
-        );
+        $body = $login->toJSON();
 
-        return $this->executeQuery($query);
+        return $this->executeQuery('/login',$body);
     }
 
     public function logout(Logout $logout)
