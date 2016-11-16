@@ -1,0 +1,16 @@
+{
+  "name": "Gl3nda85/BankStatements-API",
+  "description": "BankStatment Api Wrapper",
+  "keywords": ["framework", "laravel"],
+  "license": "OPEN",
+  "type": "project",
+  "require": {
+    "php": ">=5.5",
+    "guzzlehttp/guzzle": "~5.3|~6.0"
+  },
+  "autoload": {
+    "psr-4" : {
+      "BankStatement\\" : "src/"
+    }
+  }
+}
