@@ -1,13 +1,15 @@
 <?php
-
-namespace BankStatement\Models;
 /**
  * Created by IntelliJ IDEA.
  * User: dylanaird
  * Date: 17/11/16
- * Time: 1:19 AM
+ * Time: 1:51 AM
  */
-interface ClientInterface
+
+namespace BankStatement\Exception;
+
+
+interface Exception
 {
 
 }
