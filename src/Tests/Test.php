@@ -5,8 +5,9 @@
  * Date: 17/11/16
  * Time: 3:19 AM
  */
-namespace BankStatement\Tests;
 
+
+namespace BankStatement\Tests;
 
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Provider\BankStatement;

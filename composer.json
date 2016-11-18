@@ -9,8 +9,15 @@
     "guzzlehttp/guzzle": "~5.3|~6.0"
   },
   "autoload": {
+    "classmap": [
+      "src/Models",
+      "src/Provider",
+      "src/Exception",
+      "src/Tests"
+    ],
     "psr-4" : {
-      "BankStatement\\" : "src/"
+      "BankStatement\\" : "src/",
+      "Provider\\":"src/Provider"
     }
   }
 }

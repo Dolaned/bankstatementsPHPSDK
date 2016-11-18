@@ -66,17 +66,15 @@ class BankStatement implements BankStatementsInterface
                 $body
             ]
         ]);
-
-
-        //add any other headers to the query.
     }
 
     public function login(Login $login)
     {
 
         $body = $login->toJSON();
-
+        $this->cookieJar = new CookieJar('ASESSIONID');
         return $this->executeQuery('/login',$body);
+        
     }
 
     public function logout(Logout $logout)
