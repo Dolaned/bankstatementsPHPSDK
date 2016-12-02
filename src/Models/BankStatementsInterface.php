@@ -25,6 +25,8 @@ interface BankStatementsInterface
     public function loginPreload($bankSlug);
 
     public function getStatementData($args);
+
+    public function retreiveFiles($userToken);
     
     
 

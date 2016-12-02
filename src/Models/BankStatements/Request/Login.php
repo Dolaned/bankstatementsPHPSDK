@@ -48,4 +48,12 @@ class Login
 
         )));
     }
+
+     /**
+     * @return mixed
+     */
+    public function getInstitution()
+    {
+        return $this->institution;
+    }
 }

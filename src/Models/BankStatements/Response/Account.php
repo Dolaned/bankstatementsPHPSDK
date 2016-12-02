@@ -12,6 +12,7 @@ namespace BankStatement\Models\BankStatements;
 class Account
 {
     private $name;
+    private $slug;
     private $accountNumber;
     private $id;
     private $bsb;
@@ -29,7 +30,7 @@ class Account
      * @param $balance
      * @param $available
      */
-    public function __construct($accountType, $name, $accountNumber, $id, $bsb, $balance, $available)
+    public function __construct($accountType = null, $name = null, $accountNumber = null, $id = null, $bsb = null, $balance = null, $available = null)
     {
         $this->accountType = $accountType;
         $this->name = $name;
@@ -150,6 +151,23 @@ class Account
     public function setAvailable($available)
     {
         $this->available = $available;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param mixed $slug
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
     }
 
 }

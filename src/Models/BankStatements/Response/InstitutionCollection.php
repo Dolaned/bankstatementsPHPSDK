@@ -2,30 +2,28 @@
 /**
  * Created by IntelliJ IDEA.
  * User: dylanaird
- * Date: 17/11/16
- * Time: 2:38 AM
+ * Date: 2/12/16
+ * Time: 11:07 PM
  */
 
 namespace BankStatement\Models\BankStatements\Response;
 
 
-use BankStatement\Models\BankStatements\Account;
-
-class AccountCollection
+class InstitutionCollection
 {
     /**
-     * @var Account
+     * @var Institutions
      */
-    private $accounts;
+    private $institutions;
 
 
     /**
-     * @param Account[] $addresses
+     * @param Institutions[] $addresses
      */
 
-    public function __construct(array $accounts = [])
+    public function __construct(array $institions = [])
     {
-        $this->accounts = array_values($accounts);
+        $this->institutions = array_values($institions);
     }
 
     /**
@@ -40,50 +38,49 @@ class AccountCollection
      */
     public function count()
     {
-        return count($this->accounts);
+        return count($this->institutions);
     }
     /**
-     * @return Account
+     * @return Institutions
      */
     public function first()
     {
-        if (empty($this->accounts)) {
+        if (empty($this->institutions)) {
             //throw new CollectionIsEmpty('The AddressCollection instance is empty.');
         }
-        return reset($this->accounts);
+        return reset($this->institutions);
     }
     /**
-     * @return Account[]
+     * @return Institutions[]
      */
     public function slice($offset, $length = null)
     {
 
-        return array_slice($this->accounts, $offset, $length);
+        return array_slice($this->institutions, $offset, $length);
     }
     /**
      * @return bool
      */
     public function has($index)
     {
-        return isset($this->accounts[$index]);
+        return isset($this->institutions[$index]);
     }
     /**
-     * @return Account
+     * @return Institutions
      * @throws \OutOfBoundsException
      */
     public function get($index)
     {
-        if (!isset($this->accounts[$index])) {
+        if (!isset($this->institutions[$index])) {
             throw new \OutOfBoundsException(sprintf('The index "%s" does not exist in this collection.', $index));
         }
-        return $this->accounts[$index];
+        return $this->institutions[$index];
     }
     /**
-     * @return Account[]
+     * @return Institutions[]
      */
     public function all()
     {
-        return $this->accounts;
+        return $this->institutions;
     }
-
 }
