@@ -6,7 +6,12 @@
   "type": "project",
   "require": {
     "php": ">=5.5",
-    "guzzlehttp/guzzle": "~5.3|~6.0"
+    "guzzlehttp/guzzle": "~5.3|~6.0",
+    "zendframework/zend-filter": "2.*",
+    "zendframework/zend-eventmanager": "2.*",
+    "zendframework/zend-servicemanager": "2.*",
+    "zendframework/zend-stdlib": "2.*",
+    "doctrine/collections": "1.*"
   },
   "autoload": {
     "classmap": [

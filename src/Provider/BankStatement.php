@@ -12,69 +12,53 @@ use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Logout;
 use BankStatement\Models\BankStatementsInterface;
 use GuzzleHttp\Client;
-use GuzzleHttp\Cookie\CookieJar;
 
 class BankStatement implements BankStatementsInterface
 {
 
-    private $APIKey;
+    private $accessToken;
 
     private $isTest;
 
-    private $client;
+    private $guzzleClient;
 
     private $cookieJar;
 
+
     /**
      * @var string
      */
-    const ENDPOINT_URL = 'https://www.bankstatements.com.au/api/v1/';
+    private static $baseUrl = 'https://www.bankstatements.com.au/api/v1/';
     /**
      * @var string
      */
-    const ENDPOINT_URL_TEST = 'https://test.bankstatements.com.au/api/v1/';
+    private static $baseTestUrl = 'https://test.bankstatements.com.au/api/v1/';
 
 
-    public function __construct($apikey, $test = false)
+    public function __construct($apiKey, $test = false)
     {
-        $this->APIKey = $apikey;
+        $this->accessToken = $apiKey;
         $this->isTest = $test;
-        $this->cookieJar = new CookieJar();
-    }
-
-    //builds Guzzle Client and returns it
-    public function buildClient(){
-
-        $url = $this->isTest ? self::ENDPOINT_URL_TEST : self::ENDPOINT_URL;
-        $client = new Client(['base_uri' => $url]);
-        
-        return $client;
-    }
-
-    public function executeQuery($location, $body){
-
-        //build the Http client
-        $this->client = $this->buildClient();
-
-        //make the call
-        return $this->client->request('GET', $location, [
-            'headers' => [
-                'X-API-KEY' => $this->APIKey,
-                'Content-Type'     => 'application/json'
-            ],
-            'body' =>[
-                $body
-            ]
+        $url = $this->isTest ? self::$baseTestUrl : self::$baseUrl;
+        $this->guzzleClient = new Client([
+            'base_uri' => $url,
+            //use our cookie jar
+            'cookies' => $this->cookieJar,
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'X-API-KEY' => $this->accessToken
+            )
         ]);
+
     }
 
     public function login(Login $login)
     {
+        $response = $this->guzzleClient->request('POST', 'login', ['body' => $login->toJSON()]);
 
-        $body = $login->toJSON();
-        $this->cookieJar = new CookieJar('ASESSIONID');
-        return $this->executeQuery('/login',$body);
-        
+        return $response;
+
+
     }
 
     public function logout(Logout $logout)
