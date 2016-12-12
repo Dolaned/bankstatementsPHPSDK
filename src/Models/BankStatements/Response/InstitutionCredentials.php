@@ -23,6 +23,19 @@ class InstitutionCredentials
     private $values;
     
     private $keyboardType;
+    
+    /*
+     * Below Used for MFA with a captcha.
+     * */
+
+    private $src;
+
+    private $width;
+
+    private $height;
+
+    private $alt;
+
 
     /**
      * InstitutionCredentials constructor.
@@ -91,5 +104,68 @@ class InstitutionCredentials
         return $this->keyboardType;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getSrc()
+    {
+        return $this->src;
+    }
+
+    /**
+     * @param mixed $src
+     */
+    public function setSrc($src)
+    {
+        $this->src = $src;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWidth()
+    {
+        return $this->width;
+    }
+
+    /**
+     * @param mixed $width
+     */
+    public function setWidth($width)
+    {
+        $this->width = $width;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHeight()
+    {
+        return $this->height;
+    }
+
+    /**
+     * @param mixed $height
+     */
+    public function setHeight($height)
+    {
+        $this->height = $height;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAlt()
+    {
+        return $this->alt;
+    }
+
+    /**
+     * @param mixed $alt
+     */
+    public function setAlt($alt)
+    {
+        $this->alt = $alt;
+    }
 
 }

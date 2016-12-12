@@ -3,6 +3,7 @@
 namespace BankStatement\Models;
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Logout;
+use BankStatement\Models\BankStatements\Response\Institution;
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,9 +23,13 @@ interface BankStatementsInterface
 
     public function listInstitutions();
 
-    public function loginPreload($bankSlug);
+    public function getLoginPreload($bankSlug);
+
+    public function putLoginPreload(Institution $institution);
 
     public function getStatementData($args);
+
+    public function LoginAndGetAllStatements();
 
     public function retreiveFiles($userToken);
     

@@ -20,22 +20,27 @@ $loginCreds = new Login('bank_of_statements','12345678','TestMyMoney');
 try{
     $accountCollection = $bank->login($loginCreds);
     $firstAccount =  $accountCollection->get(1);
-    echo $firstAccount->getName();
+    echo 'Acc Name: '.$firstAccount->getName();
     echo '<br/>';
-    echo $firstAccount->getAccountNumber();
+
+    echo 'Acc Type: '.$firstAccount->getAccountType();
     echo '<br/>';
-    echo $firstAccount->getBalance();
+    echo 'BSB: '.$firstAccount->getBsb();
     echo '<br/>';
-    echo $firstAccount->getBsb();
+    echo 'Acc No: '.$firstAccount->getAccountNumber();
     echo '<br/>';
-    echo $firstAccount->getAccountType();
-    echo '<br/>';
+    echo 'Acc Balance: '.$firstAccount->getBalance();
+
+
+
 
 }catch (ClientException $e){
     echo $e->getMessage();
 }
 
-
+echo '<br/>';
+echo '<br/>';
+echo '<br/>';
 
 $institutions = $bank->listInstitutions('au');
 $firstInstitution = $institutions->first();
@@ -44,5 +49,6 @@ echo '<br/>';
 echo $firstInstitution->getMaxDays();
 echo '<br/>';
 
+echo $bank->verifyAPI();
 
 
