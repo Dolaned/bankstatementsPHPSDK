@@ -11,6 +11,7 @@ namespace BankStatement\Provider;
 use BankStatement\Models\BankStatements\Account;
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Logout;
+use BankStatement\Models\BankStatements\Request\StatementDataRequest;
 use BankStatement\Models\BankStatements\Response\AccountCollection;
 use BankStatement\Models\BankStatements\Response\Institution;
 use BankStatement\Models\BankStatements\Response\InstitutionCaptcha;
@@ -86,7 +87,7 @@ class BankStatement implements BankStatementsInterface
 
     }
 
-    public function logout(Logout $logout)
+    public function logout()
     {
         $response = $this->guzzleClient->request('POST', 'logout');
         $success = $response->getStatusCode();
@@ -105,7 +106,7 @@ class BankStatement implements BankStatementsInterface
         return settype($json->status, "boolean");
     }
 
-    public function listInstitutions($region = null)
+    public function listInstitutions($region)
     {
         $response = $this->guzzleClient->request('GET', 'institutions', ['query' => ['region' => $region]]);
         $content = $response->getBody();
@@ -134,9 +135,10 @@ class BankStatement implements BankStatementsInterface
     }
 
 
-    public function getStatementData($args)
+    public function getStatementData(StatementDataRequest $statementDataRequest)
     {
 
+        $statementDataRequest->
         $response = $this->guzzleClient->request('POST', 'statements', ['query' => ['institution' => $bankSlug]]);
         $content = $response->getBody();
         // TODO: Implement getStatementData() method.

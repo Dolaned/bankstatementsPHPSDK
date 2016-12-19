@@ -11,6 +11,7 @@ namespace BankStatement\Tests;
 require '../../vendor/autoload.php';
 
 use BankStatement\Models\BankStatements\Login;
+use BankStatement\Models\BankStatements\Request\StatementDataRequest;
 use BankStatement\Provider\BankStatement;
 use GuzzleHttp\Exception\ClientException;
 

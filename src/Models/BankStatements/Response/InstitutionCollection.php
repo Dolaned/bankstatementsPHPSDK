@@ -12,13 +12,13 @@ namespace BankStatement\Models\BankStatements\Response;
 class InstitutionCollection
 {
     /**
-     * @var Institutions
+     * @var Institution
      */
     private $institutions;
 
 
     /**
-     * @param Institutions[] $addresses
+     * @param Institution[] $addresses
      */
 
     public function __construct(array $institions = [])
@@ -41,7 +41,7 @@ class InstitutionCollection
         return count($this->institutions);
     }
     /**
-     * @return Institutions
+     * @return Institution
      */
     public function first()
     {
@@ -51,7 +51,7 @@ class InstitutionCollection
         return reset($this->institutions);
     }
     /**
-     * @return Institutions[]
+     * @return Institution[]
      */
     public function slice($offset, $length = null)
     {
@@ -66,7 +66,7 @@ class InstitutionCollection
         return isset($this->institutions[$index]);
     }
     /**
-     * @return Institutions
+     * @return Institution
      * @throws \OutOfBoundsException
      */
     public function get($index)
@@ -77,7 +77,7 @@ class InstitutionCollection
         return $this->institutions[$index];
     }
     /**
-     * @return Institutions[]
+     * @return Institution[]
      */
     public function all()
     {

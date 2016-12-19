@@ -3,6 +3,7 @@
 namespace BankStatement\Models;
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Logout;
+use BankStatement\Models\BankStatements\Request\StatementDataRequest;
 use BankStatement\Models\BankStatements\Response\Institution;
 
 /**
@@ -17,17 +18,17 @@ interface BankStatementsInterface
 
     public function login(Login $login);
 
-    public function logout(Logout $logout);
+    public function logout();
 
     public function verifyAPI();
 
-    public function listInstitutions();
+    public function listInstitutions($region);
 
     public function getLoginPreload($bankSlug);
 
     public function putLoginPreload(Institution $institution);
 
-    public function getStatementData($args);
+    public function getStatementData(StatementDataRequest $dataRequest);
 
     public function LoginAndGetAllStatements();
 
