@@ -9,14 +9,64 @@
 namespace BankStatement\Models\BankStatements\Request;
 
 
+use BankStatement\Models\BankStatements\Response\AccountCollection;
+
 class StatementDataRequest
 {
-    private $numOfDays;
-    private $rawData;
-    private $accounts = array();
+    private $requestNumDays;
+    private $generate_raw_file;
+    private $accounts;
     private $password;
 
-    public function __construct($accounts = array())
+    public function __construct(AccountCollection $accounts)
+    {
+        $this->accounts = $accounts;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRequestNumDays()
+    {
+        return $this->requestNumDays;
+    }
+
+    /**
+     * @param mixed $requestNumDays
+     */
+    public function setRequestNumDays($requestNumDays)
+    {
+        $this->requestNumDays = $requestNumDays;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getGenerateRawFile()
+    {
+        return $this->generate_raw_file;
+    }
+
+    /**
+     * @param mixed $generate_raw_file
+     */
+    public function setGenerateRawFile($generate_raw_file)
+    {
+        $this->generate_raw_file = $generate_raw_file;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAccounts()
+    {
+        return $this->accounts;
+    }
+
+    /**
+     * @param array $accounts
+     */
+    public function setAccounts($accounts)
     {
         $this->accounts = $accounts;
     }
@@ -30,60 +80,13 @@ class StatementDataRequest
     }
 
     /**
-     * @return mixed
-     */
-    public function getRawData()
-    {
-        return $this->rawData;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAccounts()
-    {
-        return $this->accounts;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getNumOfDays()
-    {
-        return $this->numOfDays;
-    }
-
-    /**
-     * @param mixed $numOfDays
-     */
-    public function setNumOfDays($numOfDays)
-    {
-        $this->numOfDays = $numOfDays;
-    }
-
-    /**
-     * @param mixed $rawData
-     */
-    public function setRawData($rawData)
-    {
-        $this->rawData = $rawData;
-    }
-
-    /**
-     * @param array $accounts
-     */
-    public function setAccounts($accounts)
-    {
-        $this->accounts = $accounts;
-    }
-
-    /**
      * @param mixed $password
      */
     public function setPassword($password)
     {
         $this->password = $password;
     }
+
 
 
 }

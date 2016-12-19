@@ -12,11 +12,13 @@ require '../../vendor/autoload.php';
 
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Request\StatementDataRequest;
+use BankStatement\Models\BankStatements\Response\AccountCollection;
 use BankStatement\Provider\BankStatement;
 use GuzzleHttp\Exception\ClientException;
 
 $bank = new BankStatement('GUQ2E1NVW13LC6KF1SFX834WSE0VEVISAVQQIZKZ', true);
 $loginCreds = new Login('bank_of_statements','12345678','TestMyMoney');
+
 
 try{
     $accountCollection = $bank->login($loginCreds);
@@ -31,6 +33,17 @@ try{
     echo 'Acc No: '.$firstAccount->getAccountNumber();
     echo '<br/>';
     echo 'Acc Balance: '.$firstAccount->getBalance();
+
+    echo '<br/>';
+    echo '<br/>';
+    echo '<br/>';
+    echo 'Statement Request Test';
+
+    $statementRequest = new StatementDataRequest($accountCollection);
+    $bank->getStatementData($statementRequest);
+
+
+
 
 
 

@@ -10,7 +10,6 @@ namespace BankStatement\Provider;
 
 use BankStatement\Models\BankStatements\Account;
 use BankStatement\Models\BankStatements\Login;
-use BankStatement\Models\BankStatements\Logout;
 use BankStatement\Models\BankStatements\Request\StatementDataRequest;
 use BankStatement\Models\BankStatements\Response\AccountCollection;
 use BankStatement\Models\BankStatements\Response\Institution;
@@ -19,6 +18,7 @@ use BankStatement\Models\BankStatements\Response\InstitutionCollection;
 use BankStatement\Models\BankStatements\Response\InstitutionCredentials;
 use BankStatement\Models\BankStatementsInterface;
 use GuzzleHttp\Client;
+use GuzzleHttp\Cookie\CookieJar;
 
 class BankStatement implements BankStatementsInterface
 {
@@ -30,6 +30,8 @@ class BankStatement implements BankStatementsInterface
     private $guzzleClient;
 
     private $cookieJar;
+
+    private $userToken;
 
 
     /**
@@ -47,6 +49,7 @@ class BankStatement implements BankStatementsInterface
         $this->accessToken = $apiKey;
         $this->isTest = $test;
         $url = $this->isTest ? self::$baseTestUrl : self::$baseUrl;
+        $this->cookieJar = new CookieJar();
         $this->guzzleClient = new Client([
             'base_uri' => $url,
             //use our cookie jar
@@ -57,12 +60,17 @@ class BankStatement implements BankStatementsInterface
             )
         ]);
 
+
+
     }
 
     public function login(Login $login)
     {
         $response = $this->guzzleClient->request('POST', 'login', ['body' => $login->toJSON()]);
         $content = $response->getBody();
+
+        //set cookie once logged in
+        $this->userToken = $this->cookieJar->toArray()[0]['Value'];
 
         $bankSlug = $login->getInstitution();
 
@@ -83,6 +91,7 @@ class BankStatement implements BankStatementsInterface
             $acc->setSlug($bankSlug);
             array_push($accounts, $acc);
         }
+
         return new AccountCollection($accounts);
 
     }
@@ -137,10 +146,36 @@ class BankStatement implements BankStatementsInterface
 
     public function getStatementData(StatementDataRequest $statementDataRequest)
     {
+        if (sizeof($statementDataRequest->getAccounts()) < 1) {
+            //throw error.
+        }
 
-        $statementDataRequest->
-        $response = $this->guzzleClient->request('POST', 'statements', ['query' => ['institution' => $bankSlug]]);
+        //passed accounts.
+        $accounts = $statementDataRequest->getAccounts()->all();
+
+        //bankslug for the accounts
+        $bankSlug = $accounts[0]->getSlug();
+
+        //get all the id's for all the accounts passed in.
+        $accountIdArray = [];
+        foreach ($accounts as $account) {
+            array_push($accountIdArray, $account->getId());
+        }
+
+
+        $jsonBody = json_encode(array('accounts' => array(
+            $bankSlug => $accountIdArray),
+            'password' => $statementDataRequest->getPassword() != null ? $statementDataRequest->getPassword() : 0,
+            'requestNumDays' => $statementDataRequest->getRequestNumDays() != null ? $statementDataRequest->getRequestNumDays() : 90,
+            'generate_raw_file' => $statementDataRequest->getGenerateRawFile() != null ? $statementDataRequest->getGenerateRawFile() : false
+        ));
+
+
+
+        $response = $this->guzzleClient->request('POST', 'statements',
+            ['headers'=> array('X-USER-TOKEN' => $this->userToken),'body' => $jsonBody]);
         $content = $response->getBody();
+        var_dump(json_decode($content));
         // TODO: Implement getStatementData() method.
     }
 
@@ -179,7 +214,6 @@ class BankStatement implements BankStatementsInterface
 
         }
 
-
         return (new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
     }
 
@@ -211,7 +245,6 @@ class BankStatement implements BankStatementsInterface
             }
 
         }
-
 
         return (new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
     }
