@@ -12,6 +12,8 @@ namespace BankStatement\Models\BankStatements\Response;
 class Transaction
 {
 
+    private $dateObject;
+    
     private $date;
 
     private $text;

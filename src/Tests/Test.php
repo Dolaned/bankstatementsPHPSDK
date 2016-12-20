@@ -17,7 +17,7 @@ use BankStatement\Provider\BankStatement;
 use GuzzleHttp\Exception\ClientException;
 
 $bank = new BankStatement('GUQ2E1NVW13LC6KF1SFX834WSE0VEVISAVQQIZKZ', true);
-$loginCreds = new Login('bank_of_statements','12345678','TestMyMoney');
+$loginCreds = new Login('cba','39415655','p5n-mx1992');
 
 
 try{

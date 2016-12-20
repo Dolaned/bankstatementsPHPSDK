@@ -61,7 +61,6 @@ class BankStatement implements BankStatementsInterface
         ]);
 
 
-
     }
 
     public function login(Login $login)
@@ -171,11 +170,10 @@ class BankStatement implements BankStatementsInterface
         ));
 
 
-
         $response = $this->guzzleClient->request('POST', 'statements',
-            ['headers'=> array('X-USER-TOKEN' => $this->userToken),'body' => $jsonBody]);
+            ['headers' => array('X-USER-TOKEN' => $this->userToken), 'body' => $jsonBody]);
         $content = $response->getBody();
-        var_dump(json_decode($content));
+        var_dump($content->getContents());
         // TODO: Implement getStatementData() method.
     }
 
