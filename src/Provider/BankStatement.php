@@ -12,10 +12,13 @@ use BankStatement\Models\BankStatements\Account;
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Request\StatementDataRequest;
 use BankStatement\Models\BankStatements\Response\AccountCollection;
+use BankStatement\Models\BankStatements\Response\DateObject;
+use BankStatement\Models\BankStatements\Response\DayEndBalance;
 use BankStatement\Models\BankStatements\Response\Institution;
 use BankStatement\Models\BankStatements\Response\InstitutionCaptcha;
 use BankStatement\Models\BankStatements\Response\InstitutionCollection;
 use BankStatement\Models\BankStatements\Response\InstitutionCredentials;
+use BankStatement\Models\BankStatements\Response\Transaction;
 use BankStatement\Models\BankStatementsInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
@@ -86,7 +89,7 @@ class BankStatement implements BankStatementsInterface
         $accounts = [];
 
         foreach ($json->accounts as $account) {
-            $acc = new Account($account->accountType, $account->name, $account->accountNumber, $account->id, $account->bsb, $account->balance, $account->available);
+            $acc = new Account($account->accountType, $account->name, $account->accountNumber, $account->id, $account->bsb, $account->balance, $account->accountHolder, $account->available);
             $acc->setSlug($bankSlug);
             array_push($accounts, $acc);
         }
@@ -173,7 +176,109 @@ class BankStatement implements BankStatementsInterface
         $response = $this->guzzleClient->request('POST', 'statements',
             ['headers' => array('X-USER-TOKEN' => $this->userToken), 'body' => $jsonBody]);
         $content = $response->getBody();
-        var_dump($content->getContents());
+
+        //decode json string
+        $json = json_decode($content);
+
+        //pull up the accounts using the bank slug.
+        $jsonAccounts = $json->accounts->$bankSlug;
+
+        //statement collection
+        $statements = [];
+
+        foreach ($jsonAccounts as $accountInfo) {
+
+            //create holders for collections.
+            $transactionArray = [];
+
+
+            //Day End Balances Collection
+            $dayEndBalanceCollection = [];
+
+            //income collection
+            $incomeCollection = [];
+            $benifitCollection = [];
+            $dishonourColection = [];
+            $rentCollection = [];
+
+            foreach ($accountInfo->statementData->details as $transaction) {
+
+                //create the date object.
+                $dateObject = new DateObject($transaction->dateObj->date, $transaction->dateObj->timezone_type, $transaction->dateObj->timezone);
+
+                //create the tags array
+                $tags = [];
+                //parse the tags.
+                foreach ($transaction->tags as $tag) {
+                    array_push($tags, $tag);
+                }
+
+                //create the transaction with the tags and date object.
+                $singleTrans = new Transaction($dateObject, $transaction->date, $transaction->text, $transaction->amount, $transaction->type, $transaction->balance, $tags);
+                array_push($transactionArray, $singleTrans);
+
+
+            }
+
+            //pass each day end balance for this account.
+            foreach ($accountInfo->dayEndBalance as $dayEndBalance) {
+                $obj = new DayEndBalance($dayEndBalance->date, $dayEndBalance->balance);
+                array_push($dayEndBalanceCollection, $obj);
+            }
+
+            //time to parse analysis arrays. woo
+
+            foreach($accountInfo->income as $incomeAnalysis){
+                if($incomeAnalysis == "total"){
+                    if($incomeAnalysis->total->transactionCount == 0){
+                        break;
+                    }
+
+                }else{
+                    $transactions = [];
+                    foreach ($incomeAnalysis->transactions as $transaction){
+                        //create the date object.
+                        $dateObject = new DateObject($transaction->dateObj->date, $transaction->dateObj->timezone_type, $transaction->dateObj->timezone);
+
+                        //create the tags array
+                        $tags = [];
+                        //parse the tags.
+                        foreach ($transaction->tags as $tag) {
+                            array_push($tags, $tag);
+                        }
+
+                        //create the transaction with the tags and date object.
+                        $singleTrans = new Transaction($dateObject, $transaction->date, $transaction->text, $transaction->amount, $transaction->type, $transaction->balance, $tags);
+                        array_push($transactions, $singleTrans);
+                    }
+                }
+
+            }
+
+            foreach($accountInfo->Benefits as $benefitAnalysis){
+
+            }
+
+            foreach($accountInfo->Dishonours as $dishonourAnalysis){
+
+            }
+
+            foreach ($accountInfo->Loans as $loanAnalysis){
+
+            }
+            foreach($accountInfo->Gambling as $gamblingAnalysis){
+
+            }
+
+            foreach($accountInfo->{'Other Debits'} as $otherDebitsAnalysis){
+
+            }
+
+
+        }
+
+
+        //var_dump($content->getContents());
         // TODO: Implement getStatementData() method.
     }
 

@@ -18,7 +18,9 @@ class Account
     private $bsb;
     private $balance;
     private $available;
+    private $accountHolder;
     private $accountType;
+
 
     /**
      * Account constructor.
@@ -29,8 +31,9 @@ class Account
      * @param $bsb
      * @param $balance
      * @param $available
+     * @param $accountHolder
      */
-    public function __construct($accountType = null, $name = null, $accountNumber = null, $id = null, $bsb = null, $balance = null, $available = null)
+    public function __construct($accountType = null, $name = null, $accountNumber = null, $id = null, $bsb = null, $balance = null,$accountHolder = null, $available = null)
     {
         $this->accountType = $accountType;
         $this->name = $name;
@@ -39,7 +42,25 @@ class Account
         $this->bsb = $bsb;
         $this->balance = $balance;
         $this->available = $available;
+        $this->accountHolder = $accountHolder;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountHolder()
+    {
+        return $this->accountHolder;
+    }
+
+    /**
+     * @param mixed $accountHolder
+     */
+    public function setAccountHolder($accountHolder)
+    {
+        $this->accountHolder = $accountHolder;
+    }
+
 
     /**
      * @return mixed

@@ -35,6 +35,7 @@ try{
     echo 'Acc Balance: '.$firstAccount->getBalance();
 
     echo '<br/>';
+    echo 'Account Holder'.$firstAccount->getAccountHolder();
     echo '<br/>';
     echo '<br/>';
     echo 'Statement Request Test';
@@ -52,17 +53,5 @@ try{
     echo $e->getMessage();
 }
 
-echo '<br/>';
-echo '<br/>';
-echo '<br/>';
-
-$institutions = $bank->listInstitutions('au');
-$firstInstitution = $institutions->first();
-echo $firstInstitution->getName();
-echo '<br/>';
-echo $firstInstitution->getMaxDays();
-echo '<br/>';
-
-echo $bank->verifyAPI();
 
 
