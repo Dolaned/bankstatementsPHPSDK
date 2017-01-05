@@ -17,7 +17,7 @@ use BankStatement\Provider\BankStatement;
 use GuzzleHttp\Exception\ClientException;
 
 $bank = new BankStatement('GUQ2E1NVW13LC6KF1SFX834WSE0VEVISAVQQIZKZ', true);
-$loginCreds = new Login('cba','39415655','p5n-mx1992');
+$loginCreds = new Login('bank_of_statements','12345678','TestMyMoney');
 
 
 try{
@@ -35,11 +35,12 @@ try{
     echo 'Acc Balance: '.$firstAccount->getBalance();
 
     echo '<br/>';
-    echo 'Account Holder'.$firstAccount->getAccountHolder();
+    echo 'Account Holder: '.$firstAccount->getAccountHolder();
     echo '<br/>';
     echo '<br/>';
     echo 'Statement Request Test';
     echo '<br/>';
+
 
     $accNew = [];
     array_push($accNew, $firstAccount);
@@ -52,10 +53,25 @@ try{
 
     echo 'Account Holder '.$statements->first()->getAccountHolder();
     echo '<br/>';
-    $income = $statements->first()->getIncomeCollection();
+    echo '<br/>';
+    $transactions = $statements->first()->getTransactionCollection()->all();
 
-    if($income != null){
-        echo $income->first()->getTransactions()->first()->getType();
+    if($transactions != null){
+
+        foreach ($transactions as $transaction){
+            echo "Transaction Type: ".$transaction->getType();
+            echo '<br/>';
+            echo "Transaction Amount: ".$transaction->getAmount();
+            echo '<br/>';
+            echo "Transaction Tags: ";
+            foreach ($transaction->getTags() as $tag){
+                echo $tag.' ';
+            }
+            echo '<br/>';
+            echo "Transaction Text: ".$transaction->getText();
+
+            echo '<br/>';echo '<br/>';
+        }
     }
     //echo "<pre>"; print_r($statements); echo "</pre>";
 
