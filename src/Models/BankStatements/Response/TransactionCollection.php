@@ -42,7 +42,7 @@ class TransactionCollection
         return count($this->transactions);
     }
     /**
-     * @return Institution
+     * @return Transaction
      */
     public function first()
     {
@@ -52,7 +52,7 @@ class TransactionCollection
         return reset($this->transactions);
     }
     /**
-     * @return Institution[]
+     * @return Transaction[]
      */
     public function slice($offset, $length = null)
     {
@@ -67,7 +67,7 @@ class TransactionCollection
         return isset($this->transactions[$index]);
     }
     /**
-     * @return Institution
+     * @return Transaction
      * @throws \OutOfBoundsException
      */
     public function get($index)
@@ -78,7 +78,7 @@ class TransactionCollection
         return $this->transactions[$index];
     }
     /**
-     * @return Institution[]
+     * @return Transaction[]
      */
     public function all()
     {

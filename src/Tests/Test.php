@@ -54,8 +54,11 @@ try{
     echo '<br/>';
     $income = $statements->first()->getIncomeCollection();
 
-   // echo "<pre>"; print_r($statements); echo "</pre>";
-    //var_dump($statements);
+    if($income != null){
+        echo $income->first()->getTransactions()->first()->getType();
+    }
+    //echo "<pre>"; print_r($statements); echo "</pre>";
+
 
 
 
