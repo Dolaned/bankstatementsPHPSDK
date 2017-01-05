@@ -54,7 +54,7 @@ try{
     echo '<br/>';
     $income = $statements->first()->getIncomeCollection();
 
-    echo "<pre>"; print_r($statements); echo "</pre>";
+   // echo "<pre>"; print_r($statements); echo "</pre>";
     //var_dump($statements);
 
 

@@ -242,30 +242,38 @@ class BankStatement implements BankStatementsInterface
 
 
             //forloop to set correct
+
             foreach ($accountInfo->statementData->analysis as $analysisObjects) {
                 //switch between the
-                $object = $accountInfo->statementData->analysis;
 
-                switch ($object) {
 
-                    case property_exists($object, "Income"):
-                        $incomeCollection = $this->processAnalysisObjects($analysisObjects);
-                        break 1;
-                    case property_exists($object, "Benefits"):
-                        $benefitCollection = $this->processAnalysisObjects($analysisObjects);
-                        break 1;
-                    case property_exists($object, "Loans"):
-                        $loanCollection = $this->processAnalysisObjects($analysisObjects);
-                        break 1;
-                    case property_exists($object, "Dishonours"):
-                        $dishonourCollection = $this->processAnalysisObjects($analysisObjects);
-                        break 1;
-                    case property_exists($object, "Gambling"):
-                        $gamblingCollection = $this->processAnalysisObjects($analysisObjects);
-                        break 1;
-                    case property_exists($object, "Other Debits"):
-                        $otherDebtsCollection = $this->processAnalysisObjects($analysisObjects);
-                        break 1;
+                switch ($analysisObjects) {
+
+                    case property_exists($analysisObjects, 'Wages') :
+                        $incomeCollection = $this->processAnalysisObjects($analysisObjects, 'Income');
+                        break;
+                    case property_exists($analysisObjects, 'Pension'):
+                        $benefitCollection = $this->processAnalysisObjects($analysisObjects, 'Benefits');
+                        break;
+                    case property_exists($analysisObjects, 'Home Loan'):
+                        $loanCollection = $this->processAnalysisObjects($analysisObjects, 'Loans');
+                        break;
+                    case property_exists($analysisObjects, 'Dishonour'):
+                        $dishonourCollection = $this->processAnalysisObjects($analysisObjects, 'Dishonours');
+                        break;
+                    case property_exists($analysisObjects, 'Casino'):
+                        $gamblingCollection = $this->processAnalysisObjects($analysisObjects, 'Gambling');
+                        break;
+                    case property_exists($analysisObjects, 'SPER'):
+                        $otherDebtsCollection = $this->processAnalysisObjects($analysisObjects, 'Other Debits');
+                        break;
+
+                    /*
+                    Don't know if this needs to be here.
+
+                    case property_exists($analysisObjects, 'Rent'):
+                    $rentCollection = $this->processAnalysisObjects($analysisObjects, 'Rent');
+                     * */
                 }
 
             }
@@ -391,7 +399,7 @@ class BankStatement implements BankStatementsInterface
     }
 
     //use this function to remove duplicate code in the statement data function.
-    public function processAnalysisObjects($analysisObjects)
+    public function processAnalysisObjects($analysisObjects, $name)
     {
         $analysisObjectsArray = [];
 
@@ -401,7 +409,7 @@ class BankStatement implements BankStatementsInterface
 
             if (!property_exists($analysisObject, "firstTransaction")) {
                 if ($analysisObject->transactionCount == 0) {
-                    return null;
+                    continue;
                 }
 
             } else {
@@ -427,8 +435,8 @@ class BankStatement implements BankStatementsInterface
                 }
 
                 if ($analysisObject->transactionCount != 0) {
-                    
-                    $object = new AnalysisObject($analysisObject->name, $analysisObject->transactionCount, $analysisObject->totalValue, $analysisObject->monthAvg, $analysisObject->minValue, $analysisObject->maxValue, $analysisObject->firstTransaction, $analysisObject->lastTransaction, $analysisObject->period, $analysisObject->periodIsRegular, new TransactionCollection($transactions));
+
+                    $object = new AnalysisObject($name, $analysisObject->transactionCount, $analysisObject->totalValue, $analysisObject->monthAvg, $analysisObject->minValue, $analysisObject->maxValue, $analysisObject->firstTransaction, $analysisObject->lastTransaction, $analysisObject->period, $analysisObject->periodIsRegular, new TransactionCollection($transactions));
                     array_push($analysisObjectsArray, $object);
                 }
             }
