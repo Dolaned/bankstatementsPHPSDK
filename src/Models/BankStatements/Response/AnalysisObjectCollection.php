@@ -9,6 +9,8 @@
 namespace BankStatement\Models\BankStatements\Response;
 
 
+use BankStatement\Exception\CollectionIsEmpty;
+
 class AnalysisObjectCollection
 {
     /**
@@ -69,7 +71,7 @@ class AnalysisObjectCollection
 
 
     /**
-     * @param AnalysisObject[] $addresses
+     * @param AnalysisObject[] $analysisObjects
      */
 
     public function __construct(array $analysisObjects = [])
@@ -91,13 +93,15 @@ class AnalysisObjectCollection
     {
         return count($this->analysisObjects);
     }
+
     /**
      * @return AnalysisObject
+     * @throws CollectionIsEmpty
      */
     public function first()
     {
         if (empty($this->analysisObjects)) {
-            //throw new CollectionIsEmpty('The AddressCollection instance is empty.');
+            //throw new CollectionIsEmpty('The AddressCollection instance is empty.', 369 ,new \Exception());
         }
         return reset($this->analysisObjects);
     }
@@ -128,7 +132,7 @@ class AnalysisObjectCollection
         return $this->analysisObjects[$index];
     }
     /**
-     * @return Account[]
+     * @return AnalysisObject[]
      */
     public function all()
     {

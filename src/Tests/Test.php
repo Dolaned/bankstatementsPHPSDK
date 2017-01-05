@@ -39,9 +39,24 @@ try{
     echo '<br/>';
     echo '<br/>';
     echo 'Statement Request Test';
+    echo '<br/>';
 
-    $statementRequest = new StatementDataRequest($accountCollection);
-    $bank->getStatementData($statementRequest);
+    $accNew = [];
+    array_push($accNew, $firstAccount);
+    $collection = new AccountCollection($accNew);
+
+    $statementRequest = new StatementDataRequest($collection);
+    $statements = $bank->getStatementData($statementRequest);
+
+
+
+    echo 'Account Holder '.$statements->first()->getAccountHolder();
+    echo '<br/>';
+    $income = $statements->first()->getIncomeCollection();
+
+    echo "<pre>"; print_r($statements); echo "</pre>";
+    //var_dump($statements);
+
 
 
 

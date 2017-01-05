@@ -20,12 +20,13 @@ class StatementData extends Account
     //Day End Balances Collection
     private $dayEndBalanceCollection;
 
-    //income collection
+    //Collection Sets
     private $incomeCollection;
-    private $benifitCollection;
+    private $benefitCollection;
     private $dishonourColection;
-    private $rentCollection;
-    //
+    private $loanCollection;
+    private  $gamblingCollection;
+    private  $otherDebtsCollection;
 
     private $totalCredits;
     private $totalDebits;
@@ -46,9 +47,11 @@ class StatementData extends Account
      * @param $transactionCollection
      * @param $dayEndBalanceCollection
      * @param $incomeCollection
-     * @param $benifitCollection
+     * @param $benefitCollection
      * @param $dishonourColection
-     * @param $rentCollection
+     * @param $loanCollection
+     * @param $gamblingCollection
+     * @param $otherDebtsCollection
      * @param $totalCredits
      * @param $totalDebits
      * @param $openingBalance
@@ -64,14 +67,8 @@ class StatementData extends Account
      * @param $account
      * @param $bankSlug
      */
-    public function __construct(TransactionCollection $transactionCollection, DayEndBalanceCollection $dayEndBalanceCollection, AnalysisObjectCollection $incomeCollection, AnalysisObjectCollection $benifitCollection, AnalysisObjectCollection $dishonourColection, AnalysisObjectCollection $rentCollection, $totalCredits, $totalDebits, $openingBalance, $closingBalance, $startDate, $endDate, $minBalance, $maxBalance, $minDayEndBalance, $maxDayEndBalance, $daysInNegative, $errorMessage, Account $account, $bankSlug)
+    public function __construct($totalCredits, $totalDebits, $openingBalance, $closingBalance, $startDate, $endDate, $minBalance, $maxBalance, $minDayEndBalance, $maxDayEndBalance, $daysInNegative, $errorMessage, Account $account, $bankSlug)
     {
-        $this->transactionCollection = $transactionCollection;
-        $this->dayEndBalanceCollection = $dayEndBalanceCollection;
-        $this->incomeCollection = $incomeCollection;
-        $this->benifitCollection = $benifitCollection;
-        $this->dishonourColection = $dishonourColection;
-        $this->rentCollection = $rentCollection;
         $this->totalCredits = $totalCredits;
         $this->totalDebits = $totalDebits;
         $this->openingBalance = $openingBalance;
@@ -85,7 +82,7 @@ class StatementData extends Account
         $this->daysInNegative = $daysInNegative;
         $this->errorMessage = $errorMessage;
 
-        parent::__construct($account->getAccountType(), $account->getName(), $account->getAccountNumber(), $account->getId(),$account->getBsb(), $account->getBalance(), $account->getAvailable());
+        parent::__construct($account->getAccountType(), $account->getName(), $account->getAccountNumber(), $account->getId(),$account->getBsb(), $account->getBalance(), $account->getAccountHolder(), $account->getAvailable());
         parent::setSlug($bankSlug);
     }
 
@@ -140,17 +137,17 @@ class StatementData extends Account
     /**
      * @return AnalysisObjectCollection
      */
-    public function getBenifitCollection()
+    public function getBenefitCollection()
     {
-        return $this->benifitCollection;
+        return $this->benefitCollection;
     }
 
     /**
-     * @param AnalysisObjectCollection $benifitCollection
+     * @param AnalysisObjectCollection $benefitCollection
      */
-    public function setBenifitCollection($benifitCollection)
+    public function setBenefitCollection($benefitCollection)
     {
-        $this->benifitCollection = $benifitCollection;
+        $this->benefitCollection = $benefitCollection;
     }
 
     /**
@@ -162,27 +159,11 @@ class StatementData extends Account
     }
 
     /**
-     * @param AnalysisObjectCollection $dishonourColection
+     * @param AnalysisObjectCollection $dishonourCollection
      */
-    public function setDishonourColection($dishonourColection)
+    public function setDishonourColection($dishonourCollection)
     {
-        $this->dishonourColection = $dishonourColection;
-    }
-
-    /**
-     * @return AnalysisObjectCollection
-     */
-    public function getRentCollection()
-    {
-        return $this->rentCollection;
-    }
-
-    /**
-     * @param AnalysisObjectCollection $rentCollection
-     */
-    public function setRentCollection($rentCollection)
-    {
-        $this->rentCollection = $rentCollection;
+        $this->dishonourColection = $dishonourCollection;
     }
 
     /**
@@ -367,6 +348,54 @@ class StatementData extends Account
     public function getErrorMessage()
     {
         return $this->errorMessage;
+    }
+
+    /**
+     * @return AnalysisObjectCollection
+     */
+    public function getLoanCollection()
+    {
+        return $this->loanCollection;
+    }
+
+    /**
+     * @param AnalysisObjectCollection $loanCollection
+     */
+    public function setLoanCollection($loanCollection)
+    {
+        $this->loanCollection = $loanCollection;
+    }
+
+    /**
+     * @param AnalysisObjectCollection $gamblingCollection
+     */
+    public function setGamblingCollection($gamblingCollection)
+    {
+        $this->gamblingCollection = $gamblingCollection;
+    }
+
+    /**
+     * @param AnalysisObjectCollection $otherDebtsCollection
+     */
+    public function setOtherDebtsCollection($otherDebtsCollection)
+    {
+        $this->otherDebtsCollection = $otherDebtsCollection;
+    }
+
+    /**
+     * @return AnalysisObjectCollection
+     */
+    public function getGamblingCollection()
+    {
+        return $this->gamblingCollection;
+    }
+
+    /**
+     * @return AnalysisObjectCollection
+     */
+    public function getOtherDebtsCollection()
+    {
+        return $this->otherDebtsCollection;
     }
 
     /**

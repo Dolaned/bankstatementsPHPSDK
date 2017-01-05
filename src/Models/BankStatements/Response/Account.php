@@ -33,7 +33,7 @@ class Account
      * @param $available
      * @param $accountHolder
      */
-    public function __construct($accountType = null, $name = null, $accountNumber = null, $id = null, $bsb = null, $balance = null,$accountHolder = null, $available = null)
+    public function __construct($accountType = null, $name = null, $accountNumber = null, $id = null, $bsb = null, $balance = null, $accountHolder = null, $available = null)
     {
         $this->accountType = $accountType;
         $this->name = $name;

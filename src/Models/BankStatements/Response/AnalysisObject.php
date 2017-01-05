@@ -38,7 +38,7 @@ class AnalysisObject
      * @param $periodIsRegular
      * @param $transactions
      */
-    public function __construct($name, $transactionCount, $totalValue, $monthAvg, $minValue, $maxValue, $firstTransaction, $lastTransaction, $period, $periodIsRegular,TransactionCollection $transactions)
+    public function __construct($name, $transactionCount, $totalValue, $monthAvg, $minValue, $maxValue, $firstTransaction, $lastTransaction, $period, $periodIsRegular, TransactionCollection $transactions)
     {
         $this->name = $name;
         $this->transactionCount = $transactionCount;

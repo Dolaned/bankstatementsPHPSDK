@@ -12,13 +12,19 @@ use BankStatement\Models\BankStatements\Account;
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Request\StatementDataRequest;
 use BankStatement\Models\BankStatements\Response\AccountCollection;
+use BankStatement\Models\BankStatements\Response\AnalysisObject;
+use BankStatement\Models\BankStatements\Response\AnalysisObjectCollection;
 use BankStatement\Models\BankStatements\Response\DateObject;
 use BankStatement\Models\BankStatements\Response\DayEndBalance;
+use BankStatement\Models\BankStatements\Response\DayEndBalanceCollection;
 use BankStatement\Models\BankStatements\Response\Institution;
 use BankStatement\Models\BankStatements\Response\InstitutionCaptcha;
 use BankStatement\Models\BankStatements\Response\InstitutionCollection;
 use BankStatement\Models\BankStatements\Response\InstitutionCredentials;
+use BankStatement\Models\BankStatements\Response\StatementData;
+use BankStatement\Models\BankStatements\Response\StatementDataCollection;
 use BankStatement\Models\BankStatements\Response\Transaction;
+use BankStatement\Models\BankStatements\Response\TransactionCollection;
 use BankStatement\Models\BankStatementsInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
@@ -181,7 +187,7 @@ class BankStatement implements BankStatementsInterface
         $json = json_decode($content);
 
         //pull up the accounts using the bank slug.
-        $jsonAccounts = $json->accounts->$bankSlug;
+        $jsonAccounts = $json->accounts->$bankSlug->accounts;
 
         //statement collection
         $statements = [];
@@ -195,14 +201,20 @@ class BankStatement implements BankStatementsInterface
             //Day End Balances Collection
             $dayEndBalanceCollection = [];
 
-            //income collection
+
+            //These are all the array collections for all the different analysises completed by bank statements, we use this as an easy way to access all these objects.
+
             $incomeCollection = [];
-            $benifitCollection = [];
-            $dishonourColection = [];
-            $rentCollection = [];
+            $benefitCollection = [];
+            $loanCollection = [];
+            $dishonourCollection = [];
+            $gamblingCollection = [];
+            $otherDebtsCollection = [];
+
+
+            //for loop for transactions on the account.
 
             foreach ($accountInfo->statementData->details as $transaction) {
-
                 //create the date object.
                 $dateObject = new DateObject($transaction->dateObj->date, $transaction->dateObj->timezone_type, $transaction->dateObj->timezone);
 
@@ -216,70 +228,91 @@ class BankStatement implements BankStatementsInterface
                 //create the transaction with the tags and date object.
                 $singleTrans = new Transaction($dateObject, $transaction->date, $transaction->text, $transaction->amount, $transaction->type, $transaction->balance, $tags);
                 array_push($transactionArray, $singleTrans);
-
-
             }
 
             //pass each day end balance for this account.
-            foreach ($accountInfo->dayEndBalance as $dayEndBalance) {
+            $dayEndBalances = $accountInfo->statementData->dayEndBalances;
+            foreach ($dayEndBalances as $dayEndBalance) {
                 $obj = new DayEndBalance($dayEndBalance->date, $dayEndBalance->balance);
                 array_push($dayEndBalanceCollection, $obj);
             }
 
+
             //time to parse analysis arrays. woo
 
-            foreach($accountInfo->income as $incomeAnalysis){
-                if($incomeAnalysis == "total"){
-                    if($incomeAnalysis->total->transactionCount == 0){
-                        break;
-                    }
 
-                }else{
-                    $transactions = [];
-                    foreach ($incomeAnalysis->transactions as $transaction){
-                        //create the date object.
-                        $dateObject = new DateObject($transaction->dateObj->date, $transaction->dateObj->timezone_type, $transaction->dateObj->timezone);
+            //forloop to set correct
+            foreach ($accountInfo->statementData->analysis as $analysisObjects) {
+                //switch between the
+                $object = $accountInfo->statementData->analysis;
 
-                        //create the tags array
-                        $tags = [];
-                        //parse the tags.
-                        foreach ($transaction->tags as $tag) {
-                            array_push($tags, $tag);
-                        }
+                switch ($object) {
 
-                        //create the transaction with the tags and date object.
-                        $singleTrans = new Transaction($dateObject, $transaction->date, $transaction->text, $transaction->amount, $transaction->type, $transaction->balance, $tags);
-                        array_push($transactions, $singleTrans);
-                    }
+                    case property_exists($object, "Income"):
+                        $incomeCollection = $this->processAnalysisObjects($analysisObjects);
+                        break 1;
+                    case property_exists($object, "Benefits"):
+                        $benefitCollection = $this->processAnalysisObjects($analysisObjects);
+                        break 1;
+                    case property_exists($object, "Loans"):
+                        $loanCollection = $this->processAnalysisObjects($analysisObjects);
+                        break 1;
+                    case property_exists($object, "Dishonours"):
+                        $dishonourCollection = $this->processAnalysisObjects($analysisObjects);
+                        break 1;
+                    case property_exists($object, "Gambling"):
+                        $gamblingCollection = $this->processAnalysisObjects($analysisObjects);
+                        break 1;
+                    case property_exists($object, "Other Debits"):
+                        $otherDebtsCollection = $this->processAnalysisObjects($analysisObjects);
+                        break 1;
                 }
 
             }
 
-            foreach($accountInfo->Benefits as $benefitAnalysis){
 
+            //create new account here. TODO Constructor too big refractor later.
+            $account = new Account($accountInfo->accountType, $accountInfo->name, $accountInfo->accountNumber, $accountInfo->id, $accountInfo->bsb, $accountInfo->balance, $accountInfo->accountHolder, $accountInfo->available);
+            $account->setSlug($bankSlug);
+
+
+            $statementData = new StatementData($accountInfo->statementData->totalCredits, $accountInfo->statementData->totalDebits, $accountInfo->statementData->openingBalance, $accountInfo->statementData->closingBalance, $accountInfo->statementData->startDate, $accountInfo->statementData->endDate, $accountInfo->statementData->minBalance, $accountInfo->statementData->maxBalance, $accountInfo->statementData->minDayEndBalance, $accountInfo->statementData->maxDayEndBalance, $accountInfo->statementData->daysInNegative, $accountInfo->statementData->errorMessage, $account, $bankSlug);
+
+
+            //null check these rather than a large constructor.
+            if ($transactionArray != null) {
+                $statementData->setTransactionCollection(new TransactionCollection($transactionArray));
             }
 
-            foreach($accountInfo->Dishonours as $dishonourAnalysis){
-
+            if ($dayEndBalanceCollection != null) {
+                $statementData->setDayEndBalanceCollection(new DayEndBalanceCollection($dayEndBalanceCollection));
             }
 
-            foreach ($accountInfo->Loans as $loanAnalysis){
+            if ($incomeCollection != null)
+                $statementData->setIncomeCollection(new AnalysisObjectCollection($incomeCollection));
 
-            }
-            foreach($accountInfo->Gambling as $gamblingAnalysis){
+            if ($benefitCollection != null)
+                $statementData->setBenefitCollection(new AnalysisObjectCollection($benefitCollection));
 
-            }
+            if ($dishonourCollection != null)
+                $statementData->setDishonourColection(new AnalysisObjectCollection($dishonourCollection));
 
-            foreach($accountInfo->{'Other Debits'} as $otherDebitsAnalysis){
+            if ($loanCollection != null)
+                $statementData->setLoanCollection(new AnalysisObjectCollection($loanCollection));
 
-            }
+            if ($gamblingCollection != null)
+                $statementData->setGamblingCollection(new AnalysisObjectCollection($gamblingCollection));
+
+            if ($otherDebtsCollection != null)
+                $statementData->setOtherDebtsCollection(new AnalysisObjectCollection($otherDebtsCollection));
 
 
+            //also push it to the account array.
+            array_push($statements, $statementData);
         }
 
-
-        //var_dump($content->getContents());
-        // TODO: Implement getStatementData() method.
+        //from here create the statement data collection and return.
+        return new StatementDataCollection($statements);
     }
 
     public function retreiveFiles($userToken)
@@ -355,5 +388,82 @@ class BankStatement implements BankStatementsInterface
     public function LoginAndGetAllStatements()
     {
         // TODO: Implement LoginAndGetAllStatements() method.
+    }
+
+    //use this function to remove duplicate code in the statement data function.
+    public function processAnalysisObjects($analysisObjects)
+    {
+        $analysisObjectsArray = [];
+
+        foreach ($analysisObjects as $analysisObject) {
+
+            $transactions = [];
+
+            if (!property_exists($analysisObject, "firstTransaction")) {
+                if ($analysisObject->transactionCount == 0) {
+                    return null;
+                }
+
+            } else {
+                $objectTransactions = $analysisObject->transactions;
+
+                if (isset($objectTransactions) && count($objectTransactions) > 0) {
+
+                    foreach ($objectTransactions as $transaction) {
+                        //create the date object.
+                        $dateObject = new DateObject($transaction->dateObj->date, $transaction->dateObj->timezone_type, $transaction->dateObj->timezone);
+
+                        //create the tags array
+                        $tags = [];
+                        //parse the tags.
+                        foreach ($transaction->tags as $tag) {
+                            array_push($tags, $tag);
+                        }
+
+                        //create the transaction with the tags and date object.
+                        $singleTrans = new Transaction($dateObject, $transaction->date, $transaction->text, $transaction->amount, $transaction->type, $transaction->balance, $tags);
+                        array_push($transactions, $singleTrans);
+                    }
+                }
+
+                if ($analysisObject->transactionCount != 0) {
+                    
+                    $object = new AnalysisObject($analysisObject->name, $analysisObject->transactionCount, $analysisObject->totalValue, $analysisObject->monthAvg, $analysisObject->minValue, $analysisObject->maxValue, $analysisObject->firstTransaction, $analysisObject->lastTransaction, $analysisObject->period, $analysisObject->periodIsRegular, new TransactionCollection($transactions));
+                    array_push($analysisObjectsArray, $object);
+                }
+            }
+        }
+
+        return $analysisObjectsArray;
+    }
+
+
+    public function getLatestJsonError()
+    {
+
+        // Add this switch to your code
+        switch (json_last_error()) {
+            case JSON_ERROR_NONE:
+                echo ' - No errors';
+                break;
+            case JSON_ERROR_DEPTH:
+                echo ' - Maximum stack depth exceeded';
+                break;
+            case JSON_ERROR_STATE_MISMATCH:
+                echo ' - Underflow or the modes mismatch';
+                break;
+            case JSON_ERROR_CTRL_CHAR:
+                echo ' - Unexpected control character found';
+                break;
+            case JSON_ERROR_SYNTAX:
+                echo ' - Syntax error, malformed JSON';
+                break;
+            case JSON_ERROR_UTF8:
+                echo ' - Malformed UTF-8 characters, possibly incorrectly encoded';
+                break;
+            default:
+                echo ' - Unknown error';
+                break;
+        }
     }
 }
