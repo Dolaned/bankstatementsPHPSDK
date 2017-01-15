@@ -56,7 +56,7 @@ class StatementDataRequest
     }
 
     /**
-     * @return array
+     * @return AccountCollection
      */
     public function getAccounts()
     {

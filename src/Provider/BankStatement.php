@@ -27,7 +27,6 @@ use BankStatement\Models\BankStatements\Response\Transaction;
 use BankStatement\Models\BankStatements\Response\TransactionCollection;
 use BankStatement\Models\BankStatementsInterface;
 use GuzzleHttp\Client;
-use GuzzleHttp\Cookie\CookieJar;
 
 class BankStatement implements BankStatementsInterface
 {
@@ -37,10 +36,6 @@ class BankStatement implements BankStatementsInterface
     private $isTest;
 
     private $guzzleClient;
-
-    private $cookieJar;
-
-    private $userToken;
 
 
     /**
@@ -58,55 +53,72 @@ class BankStatement implements BankStatementsInterface
         $this->accessToken = $apiKey;
         $this->isTest = $test;
         $url = $this->isTest ? self::$baseTestUrl : self::$baseUrl;
-        $this->cookieJar = new CookieJar();
         $this->guzzleClient = new Client([
             'base_uri' => $url,
-            //use our cookie jar
-            'cookies' => $this->cookieJar,
             'headers' => array(
                 'Content-Type' => 'application/json',
                 'X-API-KEY' => $this->accessToken
             )
         ]);
-
-
     }
 
-    public function login(Login $login)
+    /**
+     * @param Login $login
+     * @param $userToken
+     * @return array
+     */
+    public function login(Login $login, $userToken = null)
     {
-        $response = $this->guzzleClient->request('POST', 'login', ['body' => $login->toJSON()]);
+        $response = null;
+        //means no preload attempt has been made, continue with logging in normally.
+        if ($userToken == null) {
+            $response = $this->guzzleClient->request('POST', 'login', ['body' => $login->toJSON()]);
+        } else {
+            //TODO preloader stuff here.
+        }
+
+        //get the body content.
         $content = $response->getBody();
 
-        //set cookie once logged in
-        $this->userToken = $this->cookieJar->toArray()[0]['Value'];
-
+        //set the bank slug for the accounts.
         $bankSlug = $login->getInstitution();
 
+        //decode the json response.
         $json = json_decode($content);
 
+        //check if json is null.
         if (!isset($json)) {
             echo "json is null";
 
         }
 
-        if (isset($json->accounts)) {
+        //check if the accounts are missing from the json response.
+        if (!isset($json->accounts)) {
 
         }
+
+        //account array for converting to collection.
         $accounts = [];
 
+        //loop through accounts and add them to collection.
         foreach ($json->accounts as $account) {
             $acc = new Account($account->accountType, $account->name, $account->accountNumber, $account->id, $account->bsb, $account->balance, $account->accountHolder, $account->available);
             $acc->setSlug($bankSlug);
             array_push($accounts, $acc);
         }
-
-        return new AccountCollection($accounts);
+        /**
+         * return an array that contains the userToken and account collection.
+         */
+        return array('userToken' => $json->user_token,
+            'accounts' => new AccountCollection($accounts)
+        );
 
     }
 
-    public function logout()
+    public function logout($userToken)
     {
-        $response = $this->guzzleClient->request('POST', 'logout');
+        $response = $this->guzzleClient->request('POST', 'logout',
+            ['headers' => array('X-USER-TOKEN' => $userToken)]);
         $success = $response->getStatusCode();
 
         return $success == 200 ? true : false;
@@ -152,7 +164,7 @@ class BankStatement implements BankStatementsInterface
     }
 
 
-    public function getStatementData(StatementDataRequest $statementDataRequest)
+    public function getStatementData($userToken, StatementDataRequest $statementDataRequest)
     {
         if (sizeof($statementDataRequest->getAccounts()) < 1) {
             //throw error.
@@ -180,7 +192,7 @@ class BankStatement implements BankStatementsInterface
 
 
         $response = $this->guzzleClient->request('POST', 'statements',
-            ['headers' => array('X-USER-TOKEN' => $this->userToken), 'body' => $jsonBody]);
+            ['headers' => array('X-USER-TOKEN' => $userToken), 'body' => $jsonBody]);
         $content = $response->getBody();
 
         //decode json string
@@ -202,7 +214,7 @@ class BankStatement implements BankStatementsInterface
             $dayEndBalanceCollection = [];
 
 
-            //These are all the array collections for all the different analysises completed by bank statements, we use this as an easy way to access all these objects.
+            //These are all the array collections for all the different analysis's completed by bank statements, we use this as an easy way to access all these objects.
 
             $incomeCollection = [];
             $benefitCollection = [];
@@ -325,6 +337,11 @@ class BankStatement implements BankStatementsInterface
 
     public function retreiveFiles($userToken)
     {
+
+        $response = $this->guzzleClient->request('GET', 'files',
+            ['headers' => array('X-USER-TOKEN' => $userToken)]);
+        $content = $response->getBody();
+
         // TODO: Implement retreiveFiles() method.
     }
 
@@ -393,7 +410,7 @@ class BankStatement implements BankStatementsInterface
         return (new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
     }
 
-    public function LoginAndGetAllStatements()
+    public function LoginAndGetAllStatements($userToken = null)
     {
         // TODO: Implement LoginAndGetAllStatements() method.
     }
@@ -474,4 +491,5 @@ class BankStatement implements BankStatementsInterface
                 break;
         }
     }
+
 }

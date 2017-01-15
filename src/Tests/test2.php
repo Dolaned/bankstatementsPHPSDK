@@ -17,18 +17,11 @@ use BankStatement\Provider\BankStatement;
 use GuzzleHttp\Exception\ClientException;
 
 $bank = new BankStatement('GUQ2E1NVW13LC6KF1SFX834WSE0VEVISAVQQIZKZ', true);
-$loginCreds = new Login('bank_of_statements','12345678','TestMyMoney');
-$userToken = null;
+$loginCreds = new Login('cba','39415655','p5n-mx1992');
 
 
 try{
-    $loginResponse = $bank->login($loginCreds);
-    $accountCollection = $loginResponse['accounts'];
-    $userToken = $loginResponse['userToken'];
-    echo "Token : ".$userToken;
-
-
-    echo '<br/>';
+    $accountCollection = $bank->login($loginCreds);
     $firstAccount =  $accountCollection->get(1);
     echo 'Acc Name: '.$firstAccount->getName();
     echo '<br/>';
@@ -54,15 +47,13 @@ try{
     $collection = new AccountCollection($accNew);
 
     $statementRequest = new StatementDataRequest($collection);
-    $statements = $bank->getStatementData($userToken,$statementRequest);
+    $statements = $bank->getStatementData($statementRequest);
 
 
 
     echo 'Account Holder '.$statements->first()->getAccountHolder();
     echo '<br/>';
     echo '<br/>';
-
-    //get transactions.
     $transactions = $statements->first()->getTransactionCollection()->all();
 
     if($transactions != null){
@@ -83,26 +74,6 @@ try{
         }
     }
     //echo "<pre>"; print_r($statements); echo "</pre>";
-
-
-    //get other debits.
-
-    $otherDebits = $statements->first()->getOtherDebtsCollection()->all();
-
-    if($otherDebits != null){
-
-        foreach ($otherDebits as $otherDebit){
-
-            echo $otherDebit->getName();
-            echo '<br/>';
-        }
-    }
-
-
-
-
-
-
 
 }catch (ClientException $e){
     echo $e->getMessage();

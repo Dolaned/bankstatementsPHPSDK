@@ -16,9 +16,9 @@ interface BankStatementsInterface
 {
 
 
-    public function login(Login $login);
+    public function login(Login $login, $userToken = null);
 
-    public function logout();
+    public function logout($userToken);
 
     public function verifyAPI();
 
@@ -28,9 +28,9 @@ interface BankStatementsInterface
 
     public function putLoginPreload(Institution $institution);
 
-    public function getStatementData(StatementDataRequest $dataRequest);
+    public function getStatementData($userToken, StatementDataRequest $dataRequest);
 
-    public function LoginAndGetAllStatements();
+    public function LoginAndGetAllStatements($userToken = null);
 
     public function retreiveFiles($userToken);
     
