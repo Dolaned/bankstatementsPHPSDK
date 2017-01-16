@@ -4,7 +4,7 @@ This project was created to wrap the json endpoint of bankstatements.com.au, it 
 
 ## Installation
 
-This project is availble to install using composer
+This project is available to install using composer
 
 ## Usage
 
