@@ -22,4 +22,12 @@ class Logout
     {
         $this->userToken = $tok;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getUserToken()
+    {
+        return $this->userToken;
+    }
 }

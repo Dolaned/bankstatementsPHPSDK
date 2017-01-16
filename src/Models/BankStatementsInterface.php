@@ -18,7 +18,7 @@ interface BankStatementsInterface
 
     public function login(Login $login, $userToken = null);
 
-    public function logout($userToken);
+    public function logout(Logout $logout);
 
     public function verifyAPI();
 

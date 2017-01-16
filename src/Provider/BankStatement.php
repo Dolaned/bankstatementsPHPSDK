@@ -11,6 +11,7 @@ namespace BankStatement\Provider;
 use BankStatement\Exception\EmptyJsonStringException;
 use BankStatement\Models\BankStatements\Account;
 use BankStatement\Models\BankStatements\Login;
+use BankStatement\Models\BankStatements\Logout;
 use BankStatement\Models\BankStatements\Request\StatementDataRequest;
 use BankStatement\Models\BankStatements\Response\AccountCollection;
 use BankStatement\Models\BankStatements\Response\AnalysisObject;
@@ -121,10 +122,10 @@ class BankStatement implements BankStatementsInterface
 
     }
 
-    public function logout($userToken)
+    public function logout(Logout $logout)
     {
         $response = $this->guzzleClient->request('POST', 'logout',
-            ['headers' => array('X-USER-TOKEN' => $userToken)]);
+            ['headers' => array('X-USER-TOKEN' => $logout->getUserToken())]);
         $success = $response->getStatusCode();
 
         return $success == 200 ? true : false;

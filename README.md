@@ -5,6 +5,7 @@ This project was created to wrap the json endpoint of bankstatements.com.au, it 
 ## Installation
 
 This project is available to install using composer
+
 `$ composer require gl3nda85/bank-statements-wrapper`
 
 
@@ -49,6 +50,13 @@ $accountName = $firstAccount->getName(); // Main Account
 $accountType = $firstAccount->getAccountType(); // Savings
 ```
 
+To logout and end your session pass your userToken to a logout object, this function will return true if logged out successfully.
+```
+$bankStatement->logout(new Logout($userToken));
+```
+
+
+###Retrieving Statement Data.
 
 
 ## Contributing
