@@ -31,7 +31,6 @@ The respose above contains two things an array of accounts and an access token, 
 ```
 $userToken = $loginResponse['userToken'];
 $accountCollection = $loginResponse['accounts'];
-
 ```
 The account collection is a collection of all your accounts to get the first account from the stack you can call:
 
@@ -42,8 +41,11 @@ $firstAccount = $accountCollection->first();
 with this first account object you can perform numerous tasks such as getting the account number, bsb, current balance and account holder.
 
 ```
-$accountBalance = $firstAccount-getBalance();
-
+$accountBalance = $firstAccount->getBalance(); // $52.80
+$accountBSB = $firstAccount->getBsb(); // 063-997
+$accountNumber = $firstAccount->getAccountNumber(); // 1015 8077
+$accountName = $firstAccount->getName(); // Main Account
+$accountType = $firstAccount->getAccountType(); // Savings
 ```
 
 
