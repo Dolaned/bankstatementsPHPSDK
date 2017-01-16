@@ -5,17 +5,32 @@ This project was created to wrap the json endpoint of bankstatements.com.au, it 
 ## Installation
 
 This project is available to install using composer
-1. install php 5.6 and composer
-2. run `composer require gl3nda85/bank-statements-wrapper`
-3. enjoy!
+`$ composer require gl3nda85/bank-statements-wrapper`
+
 
 ## Usage
-
-The bankstatements API is written in a OO fashion. to call a new instance of the 
+To use this api, you must contact bankstatements.com.au and purchase an api key off them.
+ 
+To create an instance of the bankstatement Api you must call it with the following function, there is a second argument for whether to connect to their live server or test server. below connects to the test server.
 
 ```
-BankStatements('YOUR_API_KEY_HERE')
+$bankStatement = new BankStatement('YOUR_API_KEY', true);
 ```
+
+To login you must pass an instance of the login class to the above bankStatement object.
+
+```
+$loginCreds = new Login('bank_of_statements', '12345678', 'TestMyMoney');
+$loginResponse = $bankStatement->login($loginCreds);
+```
+The respose above contains two things an array of accounts and an access token, which you must store locally to further use this API.
+
+```
+$userToken = $loginResponse['userToken'];
+$accountCollection = $loginResponse['accounts'];
+
+```
+
 
 ## Contributing
 
@@ -27,8 +42,8 @@ BankStatements('YOUR_API_KEY_HERE')
 
 ## Credits
 
-TODO: Write credits
+Dylan Aird
 
 ## License
 
-TODO: Write license
+Bankstatements API is released under the MIT License. See the bundled LICENSE file for details.
