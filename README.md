@@ -20,7 +20,7 @@ TODO: Write usage instructions
 
 ## History
 
-TODO: Write history
+16/01/2017 Ver 1.0
 
 ## Credits
 
