@@ -5,6 +5,7 @@
   "license": "OPEN",
   "type": "project",
   "version" : "1.0.0",
+  "minimum-stability": "stable",
   "require": {
     "php": ">=5.6.4",
     "guzzlehttp/guzzle": "~5.3|~6.0"
