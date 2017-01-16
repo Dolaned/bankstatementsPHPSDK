@@ -8,6 +8,7 @@
 
 namespace BankStatement\Provider;
 
+use BankStatement\Exception\EmptyJsonStringException;
 use BankStatement\Models\BankStatements\Account;
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Request\StatementDataRequest;
@@ -65,7 +66,8 @@ class BankStatement implements BankStatementsInterface
     /**
      * @param Login $login
      * @param $userToken
-     * @return array
+     * @return array[$userToken, AccountCollection]
+     * @throws EmptyJsonStringException
      */
     public function login(Login $login, $userToken = null)
     {
@@ -91,10 +93,14 @@ class BankStatement implements BankStatementsInterface
             echo "json is null";
 
         }
+        //there is a error on the server side.
+        if(isset($json->errorCode)){
+
+        }
 
         //check if the accounts are missing from the json response.
         if (!isset($json->accounts)) {
-
+            throw new EmptyJsonStringException();
         }
 
         //account array for converting to collection.
@@ -122,7 +128,6 @@ class BankStatement implements BankStatementsInterface
         $success = $response->getStatusCode();
 
         return $success == 200 ? true : false;
-
     }
 
     public function verifyAPI()
@@ -140,15 +145,21 @@ class BankStatement implements BankStatementsInterface
         $response = $this->guzzleClient->request('GET', 'institutions', ['query' => ['region' => $region]]);
         $content = $response->getBody();
 
+
+        //decode the json string.
         $json = json_decode($content);
+
+
+
         if (!isset($json)) {
             echo "json is null";
 
         }
 
-        if (isset($json->institutions)) {
+        if (!isset($json->institutions)) {
 
         }
+
         $institutions = [];
         $institutionCreds = [];
 
@@ -166,25 +177,16 @@ class BankStatement implements BankStatementsInterface
 
     public function getStatementData($userToken, StatementDataRequest $statementDataRequest)
     {
-        if (sizeof($statementDataRequest->getAccounts()) < 1) {
+        if (sizeof($statementDataRequest->getAccountsIds()) < 1) {
             //throw error.
         }
 
-        //passed accounts.
-        $accounts = $statementDataRequest->getAccounts()->all();
-
         //bankslug for the accounts
-        $bankSlug = $accounts[0]->getSlug();
+        $bankSlug = $statementDataRequest->getBankSlug();
 
-        //get all the id's for all the accounts passed in.
-        $accountIdArray = [];
-        foreach ($accounts as $account) {
-            array_push($accountIdArray, $account->getId());
-        }
-
-
+        //json body payload for connection.
         $jsonBody = json_encode(array('accounts' => array(
-            $bankSlug => $accountIdArray),
+            $bankSlug => $statementDataRequest->getAccountsIds()),
             'password' => $statementDataRequest->getPassword() != null ? $statementDataRequest->getPassword() : 0,
             'requestNumDays' => $statementDataRequest->getRequestNumDays() != null ? $statementDataRequest->getRequestNumDays() : 90,
             'generate_raw_file' => $statementDataRequest->getGenerateRawFile() != null ? $statementDataRequest->getGenerateRawFile() : false
@@ -202,6 +204,191 @@ class BankStatement implements BankStatementsInterface
         $jsonAccounts = $json->accounts->$bankSlug->accounts;
 
         //statement collection
+
+        $statements = $this->processStatementData($jsonAccounts, $bankSlug);
+
+
+
+        //from here create the statement data collection and return.
+        return new StatementDataCollection($statements);
+    }
+
+    public function retrieveFiles($userToken)
+    {
+
+        $response = $this->guzzleClient->request('GET', 'files',
+            ['headers' => array('X-USER-TOKEN' => $userToken)]);
+        $content = $response->getBody();
+
+        // TODO: Implement retreiveFiles() method.
+    }
+
+    public function getLoginPreload($bankSlug)
+    {
+
+        $response = $this->guzzleClient->request('GET', 'preload', ['query' => ['institution' => $bankSlug]]);
+        $content = $response->getBody();
+
+        $json = json_decode($content);
+        if (!isset($json)) {
+            echo "json is null";
+
+        }
+
+        if (!isset($json->institution)) {
+
+        }
+        $institution = $json->institution;
+        $institutionCreds = [];
+
+
+        foreach ($institution->credentials as $creds) {
+
+            if ($institution->type == "captcha" || "CAPTCHA") {
+                array_push($institutionCreds, new InstitutionCaptcha($creds->name, $creds->fieldID, $creds->type, $creds->description, $creds->values, $creds->keyboardType, $creds->src, $creds->width, $creds->wheight, $creds->alt));
+
+            } else {
+                array_push($institutionCreds, new InstitutionCredentials($creds->name, $creds->fieldID, $creds->type, $creds->description, $creds->values, $creds->keyboardType));
+            }
+
+        }
+
+        return (new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
+    }
+
+    public function putLoginPreload(Institution $institution)
+    {
+        $response = $this->guzzleClient->request('POST', 'preload', ['body' => ['institution' => $institution->getSlug()]]);
+        $content = $response->getBody();
+
+        $json = json_decode($content);
+        if (!isset($json)) {
+            echo "json is null";
+
+        }
+
+        if (isset($json->institution)) {
+
+        }
+        $institution = $json->institution;
+        $institutionCreds = [];
+
+
+        foreach ($institution->credentials as $creds) {
+
+            if ($institution->type == "captcha" || "CAPTCHA") {
+                array_push($institutionCreds, new InstitutionCaptcha($creds->name, $creds->fieldID, $creds->type, $creds->description, $creds->values, $creds->keyboardType, $creds->src, $creds->width, $creds->wheight, $creds->alt));
+
+            } else {
+                array_push($institutionCreds, new InstitutionCredentials($creds->name, $creds->fieldID, $creds->type, $creds->description, $creds->values, $creds->keyboardType));
+            }
+
+        }
+
+        return (new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
+    }
+
+    public function loginAndGetAllStatements(Login $login, StatementDataRequest$statementDataRequest, $userToken = null)
+    {
+
+
+        $jsonBody = json_encode(array( $login->toJSON(), 'accounts' => array(
+            'password' => $statementDataRequest->getPassword() != null ? $statementDataRequest->getPassword() : 0,
+            'requestNumDays' => $statementDataRequest->getRequestNumDays() != null ? $statementDataRequest->getRequestNumDays() : 90,
+            'generate_raw_file' => $statementDataRequest->getGenerateRawFile() != null ? $statementDataRequest->getGenerateRawFile() : false
+        )));
+
+        echo $jsonBody;
+
+        $response = null;
+        //means no preload attempt has been made, continue with logging in normally.
+        if ($userToken == null) {
+            $response = $this->guzzleClient->request('POST', 'login_fetch_all', ['body' => $login->toJSON()]);
+        } else {
+            //TODO preloader stuff here.
+        }
+
+        //get the body content.
+        $content = $response->getBody();
+
+        //set the bank slug for the accounts.
+        $bankSlug = $login->getInstitution();
+
+        //decode the json response.
+        $json = json_decode($content);
+
+        //check if json is null.
+        if (!isset($json)) {
+            echo "json is null";
+
+        }
+        //there is a error on the server side.
+        if(isset($json->errorCode)){
+
+        }
+
+
+
+        // TODO: Implement LoginAndGetAllStatements() method.
+    }
+
+
+    /*
+     *  Everything below this commented part are helper functions.
+     *  These functions were created to reduce duplication in code.
+     *
+     * */
+
+    //use this function to remove duplicate code in the statement data function.
+    public function processAnalysisObjects($analysisObjects, $name)
+    {
+        $analysisObjectsArray = [];
+
+        foreach ($analysisObjects as $analysisObject) {
+
+            $transactions = [];
+
+            if (!property_exists($analysisObject, "firstTransaction")) {
+                if ($analysisObject->transactionCount == 0) {
+                    continue;
+                }
+
+            } else {
+                //get the transactions from the analysis object.
+                $objectTransactions = $analysisObject->transactions;
+
+                if (isset($objectTransactions) && count($objectTransactions) > 0) {
+
+                    foreach ($objectTransactions as $transaction) {
+                        //create the date object.
+                        $dateObject = new DateObject($transaction->dateObj->date, $transaction->dateObj->timezone_type, $transaction->dateObj->timezone);
+
+                        //create the tags array
+                        $tags = [];
+                        //parse the tags.
+                        foreach ($transaction->tags as $tag) {
+                            array_push($tags, $tag);
+                        }
+
+                        //create the transaction with the tags and date object.
+                        $singleTrans = new Transaction($dateObject, $transaction->date, $transaction->text, $transaction->amount, $transaction->type, $transaction->balance, $tags);
+                        array_push($transactions, $singleTrans);
+                    }
+                }
+
+                if ($analysisObject->transactionCount != 0) {
+
+                    $object = new AnalysisObject($name, $analysisObject->transactionCount, $analysisObject->totalValue, $analysisObject->monthAvg, $analysisObject->minValue, $analysisObject->maxValue, $analysisObject->firstTransaction, $analysisObject->lastTransaction, $analysisObject->period, $analysisObject->periodIsRegular, new TransactionCollection($transactions));
+                    array_push($analysisObjectsArray, $object);
+                }
+            }
+        }
+
+        return $analysisObjectsArray;
+    }
+
+    public function processStatementData($jsonAccounts ,$bankSlug){
+
         $statements = [];
 
         foreach ($jsonAccounts as $accountInfo) {
@@ -331,137 +518,8 @@ class BankStatement implements BankStatementsInterface
             array_push($statements, $statementData);
         }
 
-        //from here create the statement data collection and return.
-        return new StatementDataCollection($statements);
+        return $statements;
     }
-
-    public function retreiveFiles($userToken)
-    {
-
-        $response = $this->guzzleClient->request('GET', 'files',
-            ['headers' => array('X-USER-TOKEN' => $userToken)]);
-        $content = $response->getBody();
-
-        // TODO: Implement retreiveFiles() method.
-    }
-
-    public function getLoginPreload($bankSlug)
-    {
-
-        $response = $this->guzzleClient->request('GET', 'preload', ['query' => ['institution' => $bankSlug]]);
-        $content = $response->getBody();
-
-        $json = json_decode($content);
-        if (!isset($json)) {
-            echo "json is null";
-
-        }
-
-        if (!isset($json->institution)) {
-
-        }
-        $institution = $json->institution;
-        $institutionCreds = [];
-
-
-        foreach ($institution->credentials as $creds) {
-
-            if ($institution->type == "captcha" || "CAPTCHA") {
-                array_push($institutionCreds, new InstitutionCaptcha($creds->name, $creds->fieldID, $creds->type, $creds->description, $creds->values, $creds->keyboardType, $creds->src, $creds->width, $creds->wheight, $creds->alt));
-
-            } else {
-                array_push($institutionCreds, new InstitutionCredentials($creds->name, $creds->fieldID, $creds->type, $creds->description, $creds->values, $creds->keyboardType));
-            }
-
-        }
-
-        return (new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
-    }
-
-    public function putLoginPreload(Institution $institution)
-    {
-        $response = $this->guzzleClient->request('POST', 'preload', ['body' => ['institution' => $institution->getSlug()]]);
-        $content = $response->getBody();
-
-        $json = json_decode($content);
-        if (!isset($json)) {
-            echo "json is null";
-
-        }
-
-        if (isset($json->institution)) {
-
-        }
-        $institution = $json->institution;
-        $institutionCreds = [];
-
-
-        foreach ($institution->credentials as $creds) {
-
-            if ($institution->type == "captcha" || "CAPTCHA") {
-                array_push($institutionCreds, new InstitutionCaptcha($creds->name, $creds->fieldID, $creds->type, $creds->description, $creds->values, $creds->keyboardType, $creds->src, $creds->width, $creds->wheight, $creds->alt));
-
-            } else {
-                array_push($institutionCreds, new InstitutionCredentials($creds->name, $creds->fieldID, $creds->type, $creds->description, $creds->values, $creds->keyboardType));
-            }
-
-        }
-
-        return (new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
-    }
-
-    public function LoginAndGetAllStatements($userToken = null)
-    {
-        // TODO: Implement LoginAndGetAllStatements() method.
-    }
-
-    //use this function to remove duplicate code in the statement data function.
-    public function processAnalysisObjects($analysisObjects, $name)
-    {
-        $analysisObjectsArray = [];
-
-        foreach ($analysisObjects as $analysisObject) {
-
-            $transactions = [];
-
-            if (!property_exists($analysisObject, "firstTransaction")) {
-                if ($analysisObject->transactionCount == 0) {
-                    continue;
-                }
-
-            } else {
-                $objectTransactions = $analysisObject->transactions;
-
-                if (isset($objectTransactions) && count($objectTransactions) > 0) {
-
-                    foreach ($objectTransactions as $transaction) {
-                        //create the date object.
-                        $dateObject = new DateObject($transaction->dateObj->date, $transaction->dateObj->timezone_type, $transaction->dateObj->timezone);
-
-                        //create the tags array
-                        $tags = [];
-                        //parse the tags.
-                        foreach ($transaction->tags as $tag) {
-                            array_push($tags, $tag);
-                        }
-
-                        //create the transaction with the tags and date object.
-                        $singleTrans = new Transaction($dateObject, $transaction->date, $transaction->text, $transaction->amount, $transaction->type, $transaction->balance, $tags);
-                        array_push($transactions, $singleTrans);
-                    }
-                }
-
-                if ($analysisObject->transactionCount != 0) {
-
-                    $object = new AnalysisObject($name, $analysisObject->transactionCount, $analysisObject->totalValue, $analysisObject->monthAvg, $analysisObject->minValue, $analysisObject->maxValue, $analysisObject->firstTransaction, $analysisObject->lastTransaction, $analysisObject->period, $analysisObject->periodIsRegular, new TransactionCollection($transactions));
-                    array_push($analysisObjectsArray, $object);
-                }
-            }
-        }
-
-        return $analysisObjectsArray;
-    }
-
 
     public function getLatestJsonError()
     {

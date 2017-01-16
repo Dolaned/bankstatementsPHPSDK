@@ -12,74 +12,75 @@ require '../../vendor/autoload.php';
 
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Request\StatementDataRequest;
-use BankStatement\Models\BankStatements\Response\AccountCollection;
 use BankStatement\Provider\BankStatement;
 use GuzzleHttp\Exception\ClientException;
 
 $bank = new BankStatement('GUQ2E1NVW13LC6KF1SFX834WSE0VEVISAVQQIZKZ', true);
-$loginCreds = new Login('bank_of_statements','12345678','TestMyMoney');
+$loginCreds = new Login('bank_of_statements', '12345678', 'TestMyMoney');
 $userToken = null;
+$bankSlug = null;
 
 
-try{
+try {
     $loginResponse = $bank->login($loginCreds);
     $accountCollection = $loginResponse['accounts'];
     $userToken = $loginResponse['userToken'];
-    echo "Token : ".$userToken;
+    echo "Session Token : " . $userToken;
 
 
     echo '<br/>';
-    $firstAccount =  $accountCollection->get(1);
-    echo 'Acc Name: '.$firstAccount->getName();
+    echo '<br/>';
+    $firstAccount = $accountCollection->get(1);
+    echo 'Acc Name: ' . $firstAccount->getName();
     echo '<br/>';
 
-    echo 'Acc Type: '.$firstAccount->getAccountType();
+    echo 'Acc Type: ' . $firstAccount->getAccountType();
     echo '<br/>';
-    echo 'BSB: '.$firstAccount->getBsb();
+    echo 'BSB: ' . $firstAccount->getBsb();
     echo '<br/>';
-    echo 'Acc No: '.$firstAccount->getAccountNumber();
+    echo 'Acc No: ' . $firstAccount->getAccountNumber();
     echo '<br/>';
-    echo 'Acc Balance: '.$firstAccount->getBalance();
+    echo 'Acc Balance: ' . $firstAccount->getBalance();
 
     echo '<br/>';
-    echo 'Account Holder: '.$firstAccount->getAccountHolder();
+    echo 'Account Holder: ' . $firstAccount->getAccountHolder();
     echo '<br/>';
     echo '<br/>';
-    echo 'Statement Request Test';
+    echo 'Statement Data for Requested Accounts';
     echo '<br/>';
 
 
-    $accNew = [];
-    array_push($accNew, $firstAccount);
-    $collection = new AccountCollection($accNew);
-
-    $statementRequest = new StatementDataRequest($collection);
-    $statements = $bank->getStatementData($userToken,$statementRequest);
+    $statementRequest = new StatementDataRequest($firstAccount->getSlug(), array($firstAccount->getId()));
 
 
+    $statements = $bank->getStatementData($userToken, $statementRequest);
 
-    echo 'Account Holder '.$statements->first()->getAccountHolder();
+
+    echo 'Account Holder ' . $statements->first()->getAccountHolder();
     echo '<br/>';
     echo '<br/>';
 
     //get transactions.
     $transactions = $statements->first()->getTransactionCollection()->all();
 
-    if($transactions != null){
+    if ($transactions != null) {
 
-        foreach ($transactions as $transaction){
-            echo "Transaction Type: ".$transaction->getType();
+        foreach ($transactions as $transaction) {
+            echo "Date : ".$transaction->getDate();
             echo '<br/>';
-            echo "Transaction Amount: ".$transaction->getAmount();
+            echo "Transaction Type: " . $transaction->getType();
+            echo '<br/>';
+            echo "Transaction Amount: " . $transaction->getAmount();
             echo '<br/>';
             echo "Transaction Tags: ";
-            foreach ($transaction->getTags() as $tag){
-                echo $tag.' ';
+            foreach ($transaction->getTags() as $tag) {
+                echo $tag . ' ';
             }
             echo '<br/>';
-            echo "Transaction Text: ".$transaction->getText();
+            echo "Transaction Text: " . $transaction->getText();
 
-            echo '<br/>';echo '<br/>';
+            echo '<br/>';
+            echo '<br/>';
         }
     }
     //echo "<pre>"; print_r($statements); echo "</pre>";
@@ -87,26 +88,24 @@ try{
 
     //get other debits.
 
-    $otherDebits = $statements->first()->getOtherDebtsCollection()->all();
+    if($statements->first()->getOtherDebtsCollection() != null){
 
-    if($otherDebits != null){
+        $otherDebits = $statements->first()->getOtherDebtsCollection()->all();
 
-        foreach ($otherDebits as $otherDebit){
+        if ($otherDebits != null) {
 
-            echo $otherDebit->getName();
-            echo '<br/>';
+            foreach ($otherDebits as $otherDebit) {
+
+                echo $otherDebit->getName();
+                echo '<br/>';
+            }
         }
     }
 
-
-
-
-
-
-
-}catch (ClientException $e){
+} catch (ClientException $e) {
     echo $e->getMessage();
 }
+
 
 
 

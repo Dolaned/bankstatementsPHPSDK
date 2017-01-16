@@ -30,9 +30,9 @@ interface BankStatementsInterface
 
     public function getStatementData($userToken, StatementDataRequest $dataRequest);
 
-    public function LoginAndGetAllStatements($userToken = null);
+    public function loginAndGetAllStatements(Login $login, StatementDataRequest $statementDataRequest, $userToken = null);
 
-    public function retreiveFiles($userToken);
+    public function retrieveFiles($userToken);
     
     
 

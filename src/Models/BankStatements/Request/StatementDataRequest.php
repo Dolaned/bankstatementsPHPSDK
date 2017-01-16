@@ -9,18 +9,53 @@
 namespace BankStatement\Models\BankStatements\Request;
 
 
-use BankStatement\Models\BankStatements\Response\AccountCollection;
-
 class StatementDataRequest
 {
     private $requestNumDays;
     private $generate_raw_file;
-    private $accounts;
+    private $accountsIds;
     private $password;
+    private $bankSlug;
+    private $referralCode;
 
-    public function __construct(AccountCollection $accounts)
+
+
+    public function __construct($bankSlug, $accountIds)
     {
-        $this->accounts = $accounts;
+        $this->accountsIds = $accountIds;
+        $this->bankSlug = $bankSlug;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getReferralCode()
+    {
+        return $this->referralCode;
+    }
+
+    /**
+     * @param mixed $referralCode
+     */
+    public function setReferralCode($referralCode)
+    {
+        $this->referralCode = $referralCode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBankSlug()
+    {
+        return $this->bankSlug;
+    }
+
+    /**
+     * @param mixed $bankSlug
+     */
+    public function setBankSlug($bankSlug)
+    {
+        $this->bankSlug = $bankSlug;
     }
 
     /**
@@ -56,19 +91,19 @@ class StatementDataRequest
     }
 
     /**
-     * @return AccountCollection
+     * @return mixed
      */
-    public function getAccounts()
+    public function getAccountsIds()
     {
-        return $this->accounts;
+        return $this->accountsIds;
     }
 
     /**
-     * @param array $accounts
+     * @param mixed $accountsIds
      */
-    public function setAccounts($accounts)
+    public function setAccountsIds($accountsIds)
     {
-        $this->accounts = $accounts;
+        $this->accountsIds = $accountsIds;
     }
 
     /**
