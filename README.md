@@ -14,7 +14,8 @@ This project is available to install using composer
 
 To use this api, you must contact bankstatements.com.au and purchase an api key off them.
  
-To create an instance of the bankstatement Api you must call it with the following function, there is a second argument for whether to connect to their live server or test server. below connects to the test server.
+To create an instance of the bankstatement Api you must call it with the following function.
+A boolean is the second argument for whether to connect to their live server or test server. below connects to the test server set it to false or nothing for the live server.
 
 ```
 $bankStatement = new BankStatement('YOUR_API_KEY', true);
