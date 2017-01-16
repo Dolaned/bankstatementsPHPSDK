@@ -1,10 +1,10 @@
 # BankStatements API Wrapper
 
-This project was created to wrap the json endpoint of bankstatements.com.au
+This project was created to wrap the json endpoint of bankstatements.com.au, it is intended to make interfacing with your bank accounts / statements easier.
 
 ## Installation
 
-TODO: Describe the installation process
+This project is availble to install using composer
 
 ## Usage
 
