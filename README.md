@@ -58,6 +58,19 @@ $bankStatement->logout(new Logout($userToken));
 
 ###Retrieving Statement Data.
 
+Once Logged in, you can retrieve statement data for each of your accounts in the following fashion.
+
+First collecting the Id's of the accounts you would like to get the statement data for.
+Second creating a new StatementDataRequest using the bank slug for the accounts.
+Finally calling getStatementData passing in the userToken from the logged in user session and the statementRequest.
+```
+$accountIds = array($firstAccount->getId(), $secondAccount->getId);
+
+$statementRequest = new StatementDataRequest($firstAccount->getSlug(), $accountIds);
+
+$statements = $bank->getStatementData($userToken, $statementRequest);
+```
+The StatementDataRequest has Advanced Options that can be used such as the amount of days for the statement and creating raw files.
 
 ## Contributing
 
