@@ -25,8 +25,8 @@ class StatementData extends Account
     private $benefitCollection;
     private $dishonourColection;
     private $loanCollection;
-    private  $gamblingCollection;
-    private  $otherDebtsCollection;
+    private $gamblingCollection;
+    private $otherDebtsCollection;
 
     private $totalCredits;
     private $totalDebits;

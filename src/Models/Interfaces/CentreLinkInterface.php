@@ -2,15 +2,15 @@
 /**
  * Created by IntelliJ IDEA.
  * User: dylanaird
- * Date: 24/11/16
- * Time: 8:22 PM
+ * Date: 17/1/17
+ * Time: 8:04 PM
  */
 
 namespace BankStatement\Models;
 
 
-class User
+interface CentreLinkInterface
 {
 
-    
+
 }

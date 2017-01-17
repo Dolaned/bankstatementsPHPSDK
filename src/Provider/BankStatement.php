@@ -149,8 +149,7 @@ class BankStatement implements BankStatementsInterface
 
         //decode the json string.
         $json = json_decode($content);
-
-
+        
 
         if (!isset($json)) {
             echo "json is null";

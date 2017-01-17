@@ -8,8 +8,10 @@
 
 namespace BankStatement\Provider;
 
+use BankStatement\Models\CentreLinkInterface;
 
-class CenterLink
+
+class CenterLink implements CentreLinkInterface
 {
 
 }

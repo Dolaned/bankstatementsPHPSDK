@@ -89,14 +89,23 @@ To get your day end balance
 $endofDayBalance = $statements->first()->getDayEndBalanceCollection()->all();
 ```
 
-Bankstatements.com.au scan your bank statements and categorize your transactions into many  
+Bankstatements.com.au scan your bank statements and categorize your transactions into many collections
 
 They have:
+```
+$incomeCollection;
+$benefitCollection;
+$dishonourColection;
+$loanCollection;
+$gamblingCollection;
+$otherDebtsCollection;
+```
 
-End of day balance
+To call any of these data sets use functions like these
 
-
-
+```
+$otherDebtsCollecton = $statements->first()->getOtherDebtsCollection()->all();
+```
 
 ## Contributing
 
