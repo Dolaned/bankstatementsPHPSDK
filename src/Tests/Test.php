@@ -63,6 +63,10 @@ try {
 
     //get transactions.
     $transactions = $statements->first()->getTransactionCollection()->all();
+    
+    $endofDayBalance = $statements->first()->getDayEndBalanceCollection()->all();
+    
+    
 
     if ($transactions != null) {
 

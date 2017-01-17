@@ -11,7 +11,7 @@ This project is available to install using composer
 
 ## Basic Usage
 
-###Log in and retrieve account information.
+###Log in and retrieve account information
 
 To use this api, you must contact bankstatements.com.au and purchase an api key off them.
  
@@ -56,7 +56,7 @@ $bankStatement->logout(new Logout($userToken));
 ```
 
 
-###Retrieving Statement Data.
+###Retrieving Statement Data
 
 Once Logged in, you can retrieve statement data for each of your accounts in the following fashion.
 
@@ -70,10 +70,37 @@ $statementRequest = new StatementDataRequest($firstAccount->getSlug(), $accountI
 
 $statements = $bank->getStatementData($userToken, $statementRequest);
 ```
-The StatementDataRequest has Advanced Options that can be used such as the amount of days for the statement and creating raw files.
+The StatementDataRequest has Advanced Options that can be used, such as the amount of days for the statement and creating raw files.
+```
+$statementRequest->setRequestNumDays(90);
+```
+Read the full Api Docs for more information.
+
+
+From calling the statement function from above you will get a collection of statement data from each account id that was entered.
+To get the first accounts list of transactions use the following function
+
+```
+$transactions = $statements->first()->getTransactionCollection()->all();
+```
+
+To get your day end balance
+```
+$endofDayBalance = $statements->first()->getDayEndBalanceCollection()->all();
+```
+
+Bankstatements.com.au scan your bank statements and categorize your transactions into many  
+
+They have:
+
+End of day balance
+
+
+
 
 ## Contributing
 
+Dylan Aird
 
 
 ## History
