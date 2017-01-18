@@ -243,6 +243,9 @@ class BankStatement implements BankStatementsInterface
         return new StatementDataCollection($statements);
     }
 
+    /**
+     * @param $userToken
+     */
     public function retrieveFiles($userToken)
     {
 
