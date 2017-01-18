@@ -27,7 +27,9 @@ try {
     $statements = $bank->getStatementData($userToken, $statementRequest);
 
 
+
     $bank->retrieveFiles($userToken);
+
 }catch(\Exception $e){
 
 }

@@ -251,10 +251,13 @@ class BankStatement implements BankStatementsInterface
 
         //Set the file name.
         $zipName = $userToken."_".'temp.zip';
+        $folder = "Storage/Statements/";
+        $zipLocation = $folder.$zipName;
+
 
         $this->guzzleClient->request('GET', 'files',
             ['headers' => array('X-USER-TOKEN' => $userToken), 'Content-Type' => 'application/x-zip', 'sink'=> $zipName]);
-
+        
         header('Content-Description: File Transfer');
         header('Content-Type: application/x-zip');
         header('Content-Disposition: attachment; filename='.basename($zipName));
