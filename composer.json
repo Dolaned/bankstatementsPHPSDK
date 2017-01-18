@@ -2,9 +2,8 @@
   "name": "gl3nda85/bank-statements-wrapper",
   "description": "BankStatment Api Wrapper",
   "keywords": ["framework", "laravel"],
-  "license": "OPEN",
+  "license": "MIT",
   "type": "project",
-  "version" : "1.0.0",
   "minimum-stability": "stable",
   "require": {
     "php": ">=5.6.4",
@@ -15,7 +14,8 @@
       "src/Models",
       "src/Provider",
       "src/Exception",
-      "src/Tests"
+      "src/Tests",
+      "src/Models/Interfaces"
     ],
     "psr-4" : {
       "BankStatement\\" : "src/",

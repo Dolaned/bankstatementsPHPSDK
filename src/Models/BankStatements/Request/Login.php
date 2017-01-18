@@ -41,12 +41,12 @@ class Login
 
     //convert this object to json.
     public function toJSON(){
-        return json_encode(array('credentials' => array(
+        return array('credentials' => array(
             'institution' => $this->institution,
             'username' => $this->username,
             'password' => $this->password
 
-        )));
+        ));
     }
 
      /**

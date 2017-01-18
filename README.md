@@ -106,7 +106,6 @@ To call any of these data sets use functions like these
 ```
 $otherDebtsCollecton = $statements->first()->getOtherDebtsCollection()->all();
 ```
-
 ## Contributing
 
 Dylan Aird

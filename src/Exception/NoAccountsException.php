@@ -2,14 +2,16 @@
 /**
  * Created by IntelliJ IDEA.
  * User: dylanaird
- * Date: 17/11/16
- * Time: 1:47 AM
+ * Date: 17/1/17
+ * Time: 8:44 PM
  */
 
 namespace BankStatement\Exception;
+
+
 use Exception;
 
-class InvalidApiCredentials extends Exception
+class NoAccountsException extends \Exception
 {
     public function __construct($message, $code, Exception $previous = null)
     {

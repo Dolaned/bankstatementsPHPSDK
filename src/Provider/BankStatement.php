@@ -9,6 +9,8 @@
 namespace BankStatement\Provider;
 
 use BankStatement\Exception\EmptyJsonStringException;
+use BankStatement\Exception\ErrorCodeException;
+use BankStatement\Exception\NoAccountsException;
 use BankStatement\Models\BankStatements\Account;
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Logout;
@@ -27,7 +29,7 @@ use BankStatement\Models\BankStatements\Response\StatementData;
 use BankStatement\Models\BankStatements\Response\StatementDataCollection;
 use BankStatement\Models\BankStatements\Response\Transaction;
 use BankStatement\Models\BankStatements\Response\TransactionCollection;
-use BankStatement\Models\BankStatementsInterface;
+use BankStatement\Models\Interfaces\BankStatementsInterface;
 use GuzzleHttp\Client;
 
 class BankStatement implements BankStatementsInterface
@@ -39,7 +41,6 @@ class BankStatement implements BankStatementsInterface
 
     private $guzzleClient;
 
-
     /**
      * @var string
      */
@@ -50,11 +51,23 @@ class BankStatement implements BankStatementsInterface
     private static $baseTestUrl = 'https://test.bankstatements.com.au/api/v1/';
 
 
+    /**
+     * BankStatement constructor.
+     * @param $apiKey
+     * @param bool $test
+     */
     public function __construct($apiKey, $test = false)
     {
+        //Api Key
         $this->accessToken = $apiKey;
+
+        //is Test boolean.
         $this->isTest = $test;
+
+        //chooses what URL to connect to given the test boolean
         $url = $this->isTest ? self::$baseTestUrl : self::$baseUrl;
+
+        //construct the guzzle client.
         $this->guzzleClient = new Client([
             'base_uri' => $url,
             'headers' => array(
@@ -69,13 +82,14 @@ class BankStatement implements BankStatementsInterface
      * @param $userToken
      * @return array[$userToken, AccountCollection]
      * @throws EmptyJsonStringException
+     * @throws ErrorCodeException
      */
     public function login(Login $login, $userToken = null)
     {
         $response = null;
         //means no preload attempt has been made, continue with logging in normally.
         if ($userToken == null) {
-            $response = $this->guzzleClient->request('POST', 'login', ['body' => $login->toJSON()]);
+            $response = $this->guzzleClient->request('POST', 'login', ['body' => json_encode($login->toJSON())]);
         } else {
             //TODO preloader stuff here.
         }
@@ -89,19 +103,14 @@ class BankStatement implements BankStatementsInterface
         //decode the json response.
         $json = json_decode($content);
 
-        //check if json is null.
-        if (!isset($json)) {
-            echo "json is null";
-
-        }
-        //there is a error on the server side.
-        if(isset($json->errorCode)){
-
-        }
-
         //check if the accounts are missing from the json response.
         if (!isset($json->accounts)) {
-            throw new EmptyJsonStringException();
+            throw new EmptyJsonStringException("Json Not Available ", 500);
+        }
+
+        //there is a error on the server side.
+        if (isset($json->errorCode)) {
+            throw new ErrorCodeException($json->error, $json->errorCode);
         }
 
         //account array for converting to collection.
@@ -122,6 +131,10 @@ class BankStatement implements BankStatementsInterface
 
     }
 
+    /**
+     * @param Logout $logout
+     * @return bool
+     */
     public function logout(Logout $logout)
     {
         $response = $this->guzzleClient->request('POST', 'logout',
@@ -131,6 +144,9 @@ class BankStatement implements BankStatementsInterface
         return $success == 200 ? true : false;
     }
 
+    /**
+     * @return bool
+     */
     public function verifyAPI()
     {
         $response = $this->guzzleClient->request('GET', 'verify');
@@ -141,23 +157,33 @@ class BankStatement implements BankStatementsInterface
         return settype($json->status, "boolean");
     }
 
+    /**
+     * @param $region
+     * @return InstitutionCollection
+     * @throws EmptyJsonStringException
+     * @throws ErrorCodeException
+     */
     public function listInstitutions($region)
     {
-        $response = $this->guzzleClient->request('GET', 'institutions', ['query' => ['region' => $region]]);
-        $content = $response->getBody();
+        $response = null;
+        if ($region == null) {
+            $response = $this->guzzleClient->request('GET', 'institutions');
+        } else {
+            $response = $this->guzzleClient->request('GET', 'institutions', ['query' => ['region' => $region]]);
+        }
 
+        $content = $response->getBody();
 
         //decode the json string.
         $json = json_decode($content);
-        
 
-        if (!isset($json)) {
-            echo "json is null";
-
+        //check if json is null.
+        if (!isset($json->institution)) {
+            throw new EmptyJsonStringException($json->error, $json->errorCode);
         }
-
-        if (!isset($json->institutions)) {
-
+        //there is a error on the server side.
+        if (isset($json->errorCode)) {
+            throw new ErrorCodeException($json->error, $json->errorCode);
         }
 
         $institutions = [];
@@ -175,10 +201,16 @@ class BankStatement implements BankStatementsInterface
     }
 
 
+    /**
+     * @param $userToken
+     * @param StatementDataRequest $statementDataRequest
+     * @return StatementDataCollection
+     * @throws NoAccountsException
+     */
     public function getStatementData($userToken, StatementDataRequest $statementDataRequest)
     {
         if (sizeof($statementDataRequest->getAccountsIds()) < 1) {
-            //throw error.
+            throw new NoAccountsException("No accounts Id's Inputted", 499);
         }
 
         //bankslug for the accounts
@@ -192,13 +224,12 @@ class BankStatement implements BankStatementsInterface
             'generate_raw_file' => $statementDataRequest->getGenerateRawFile() != null ? $statementDataRequest->getGenerateRawFile() : false
         ));
 
-
+        //make the request.
         $response = $this->guzzleClient->request('POST', 'statements',
             ['headers' => array('X-USER-TOKEN' => $userToken), 'body' => $jsonBody]);
-        $content = $response->getBody();
 
         //decode json string
-        $json = json_decode($content);
+        $json = json_decode($response->getBody());
 
         //pull up the accounts using the bank slug.
         $jsonAccounts = $json->accounts->$bankSlug->accounts;
@@ -208,7 +239,6 @@ class BankStatement implements BankStatementsInterface
         $statements = $this->processStatementData($jsonAccounts, $bankSlug);
 
 
-
         //from here create the statement data collection and return.
         return new StatementDataCollection($statements);
     }
@@ -216,13 +246,33 @@ class BankStatement implements BankStatementsInterface
     public function retrieveFiles($userToken)
     {
 
-        $response = $this->guzzleClient->request('GET', 'files',
-            ['headers' => array('X-USER-TOKEN' => $userToken)]);
-        $content = $response->getBody();
+        //Set the file name.
+        $zipName = $userToken."_".'temp.zip';
 
-        // TODO: Implement retreiveFiles() method.
+        $this->guzzleClient->request('GET', 'files',
+            ['headers' => array('X-USER-TOKEN' => $userToken), 'Content-Type' => 'application/x-zip', 'sink'=> $zipName]);
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/x-zip');
+        header('Content-Disposition: attachment; filename='.basename($zipName));
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($zipName));
+        ob_clean();
+        flush();
+        readfile($zipName);
+        unlink($zipName);
+        exit();
     }
 
+    /**
+     * @param $bankSlug
+     * @return array
+     * @throws EmptyJsonStringException
+     * @throws ErrorCodeException
+     */
     public function getLoginPreload($bankSlug)
     {
 
@@ -230,14 +280,17 @@ class BankStatement implements BankStatementsInterface
         $content = $response->getBody();
 
         $json = json_decode($content);
-        if (!isset($json)) {
-            echo "json is null";
 
-        }
-
+        //check if json is null.
         if (!isset($json->institution)) {
-
+            throw new EmptyJsonStringException($json->error, $json->errorCode);
         }
+
+        //there is a error on the server side.
+        if (isset($json->errorCode)) {
+            throw new ErrorCodeException($json->error, $json->errorCode);
+        }
+
         $institution = $json->institution;
         $institutionCreds = [];
 
@@ -253,23 +306,34 @@ class BankStatement implements BankStatementsInterface
 
         }
 
-        return (new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
+        return array('userToken' => $json->user_token,
+            'institution' => new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days)
+        );
     }
 
-    public function putLoginPreload(Institution $institution)
+    /**
+     * @param $bankSlug
+     * @return array
+     * @throws EmptyJsonStringException
+     * @throws ErrorCodeException
+     */
+    public function putLoginPreload($bankSlug)
     {
-        $response = $this->guzzleClient->request('POST', 'preload', ['body' => ['institution' => $institution->getSlug()]]);
+        $response = $this->guzzleClient->request('POST', 'preload', ['body' => ['institution' => $bankSlug]]);
         $content = $response->getBody();
 
         $json = json_decode($content);
-        if (!isset($json)) {
-            echo "json is null";
 
+        //check if json is null.
+        if (!isset($json->institution)) {
+            throw new EmptyJsonStringException($json->error, $json->errorCode);
         }
 
-        if (isset($json->institution)) {
-
+        //there is a error on the server side.
+        if (isset($json->errorCode)) {
+            throw new ErrorCodeException($json->error, $json->errorCode);
         }
+
         $institution = $json->institution;
         $institutionCreds = [];
 
@@ -285,28 +349,33 @@ class BankStatement implements BankStatementsInterface
 
         }
 
-        return (new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
+        return array('userToken' => $json->user_token,
+            'institution' => new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days)
+        );
     }
 
-    public function loginAndGetAllStatements(Login $login, StatementDataRequest$statementDataRequest, $userToken = null)
+    public function loginAndGetAllStatements(Login $login, StatementDataRequest $statementDataRequest, $userToken = null)
     {
 
+        //get the credentials for the request.
+        $request = $login->toJSON();
 
-        $jsonBody = json_encode(array( $login->toJSON(), 'accounts' => array(
-            'password' => $statementDataRequest->getPassword() != null ? $statementDataRequest->getPassword() : 0,
-            'requestNumDays' => $statementDataRequest->getRequestNumDays() != null ? $statementDataRequest->getRequestNumDays() : 90,
-            'generate_raw_file' => $statementDataRequest->getGenerateRawFile() != null ? $statementDataRequest->getGenerateRawFile() : false
-        )));
+        //add the statement data request to the request.
+        $request['password'] = $statementDataRequest->getPassword() != null ? $statementDataRequest->getPassword() : 0;
+        $request['requestNumDays'] = $statementDataRequest->getRequestNumDays() != null ? $statementDataRequest->getRequestNumDays() : 90;
+        $request['generate_raw_file'] = $statementDataRequest->getGenerateRawFile() != null ? $statementDataRequest->getGenerateRawFile() : false;
 
-        echo $jsonBody;
+        //encode the above request.
+        $jsonRequest = json_encode($request);
 
         $response = null;
-        //means no preload attempt has been made, continue with logging in normally.
-        if ($userToken == null) {
-            $response = $this->guzzleClient->request('POST', 'login_fetch_all', ['body' => $login->toJSON()]);
-        } else {
-            //TODO preloader stuff here.
+
+        //if preloader request has been made.
+        if ($userToken != null) {
+            $request['user_token'] = $userToken;
         }
+
+        $response = $this->guzzleClient->request('POST', 'login_fetch_all', ['body' => $jsonRequest]);
 
         //get the body content.
         $content = $response->getBody();
@@ -319,17 +388,13 @@ class BankStatement implements BankStatementsInterface
 
         //check if json is null.
         if (!isset($json)) {
-            echo "json is null";
-
+            throw new EmptyJsonStringException($json->errorMessage, $json->errorCode);
         }
         //there is a error on the server side.
-        if(isset($json->errorCode)){
-
+        if (isset($json->errorCode)) {
+            throw new ErrorCodeException($json->error, $json->errorCode);
         }
-
-
-
-        // TODO: Implement LoginAndGetAllStatements() method.
+        return new StatementDataCollection($this->processStatementData($json->accounts, $bankSlug));
     }
 
 
@@ -387,7 +452,8 @@ class BankStatement implements BankStatementsInterface
         return $analysisObjectsArray;
     }
 
-    public function processStatementData($jsonAccounts ,$bankSlug){
+    public function processStatementData($jsonAccounts, $bankSlug)
+    {
 
         $statements = [];
 

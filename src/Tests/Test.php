@@ -107,9 +107,17 @@ try {
         }
     }
 
+    $statementRequest->setGenerateRawFile(true);
+
+    $bank->retrieveFiles($userToken);
 
     //end users session.
     echo $bank->logout(new Logout($userToken));
+
+
+
+
+
 
 
 } catch (ClientException $e) {

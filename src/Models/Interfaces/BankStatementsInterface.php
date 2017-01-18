@@ -1,11 +1,9 @@
 <?php
 
-namespace BankStatement\Models;
+namespace BankStatement\Models\Interfaces;
 use BankStatement\Models\BankStatements\Login;
 use BankStatement\Models\BankStatements\Logout;
 use BankStatement\Models\BankStatements\Request\StatementDataRequest;
-use BankStatement\Models\BankStatements\Response\Institution;
-
 /**
  * Created by IntelliJ IDEA.
  * User: dylanaird
@@ -26,7 +24,7 @@ interface BankStatementsInterface
 
     public function getLoginPreload($bankSlug);
 
-    public function putLoginPreload(Institution $institution);
+    public function putLoginPreload($bankSlug);
 
     public function getStatementData($userToken, StatementDataRequest $dataRequest);
 
