@@ -88,7 +88,6 @@ try {
             echo '<br/>';
         }
     }
-    //echo "<pre>"; print_r($statements); echo "</pre>";
 
 
     //get other debits.
@@ -107,18 +106,8 @@ try {
         }
     }
 
-    $statementRequest->setGenerateRawFile(true);
-
-    $bank->retrieveFiles($userToken);
-
     //end users session.
     echo $bank->logout(new Logout($userToken));
-
-
-
-
-
-
 
 } catch (ClientException $e) {
     echo $e->getMessage();

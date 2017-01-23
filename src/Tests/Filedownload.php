@@ -18,7 +18,7 @@ try {
     $userToken = $loginResponse['userToken'];
 
 
-    $firstAccount = $accountCollection->get(1);
+    $firstAccount = $accountCollection->get(0);
 
     $statementRequest = new StatementDataRequest($firstAccount->getSlug(), array($firstAccount->getId()));
 
