@@ -178,7 +178,7 @@ class BankStatement implements BankStatementsInterface
         $json = json_decode($content);
 
         //check if json is null.
-        if (!isset($json->institution)) {
+        if (!isset($json->institutions)) {
             throw new EmptyJsonStringException($json->error, $json->errorCode);
         }
         //there is a error on the server side.

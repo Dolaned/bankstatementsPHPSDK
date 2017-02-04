@@ -109,6 +109,12 @@ try {
     //end users session.
     echo $bank->logout(new Logout($userToken));
 
+
+
+    $australianBanks = $bank->listInstitutions("au");
+    echo "Banks in aus: <br>";
+    echo $australianBanks->count();
+
 } catch (ClientException $e) {
     echo $e->getMessage();
 }
