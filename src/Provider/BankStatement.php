@@ -193,16 +193,16 @@ class BankStatement implements BankStatementsInterface
             foreach ($institution->credentials as $creds) {
 
                 $credentialObj = new InstitutionCredentials();
-                $credentialObj->setName($creds->name != null ? $creds->name : '');
-                $credentialObj->setFieldID($creds->fieldID != null ? $creds->fieldID : '');
-                $credentialObj->setType($creds->type != null ? $creds->type : '');
-                $credentialObj->setDescription($creds->description != null ? $creds->description : '');
-                $credentialObj->setValues($creds->values != null ? $creds->values : '');
-                $credentialObj->setKeyboardType($creds->keyboardType != null ? $creds->keyboardType : 'default');
-                $credentialObj->setSrc($creds->src != null ? $creds->src : '');
-                $credentialObj->setWidth($creds->width != null ? $creds->width : '');
-                $credentialObj->setHeight($creds->height != null ? $creds->height : '');
-                $credentialObj->setAlt($creds->alt != null ? $creds->alt : '');
+                $credentialObj->setName($this->from_obj($creds->name, ''));
+                $credentialObj->setFieldID($this->from_obj($creds->FieldID, ''));
+                $credentialObj->setType($this->from_obj($creds->type, ''));
+                $credentialObj->setDescription($this->from_obj($creds->description, ''));
+                $credentialObj->setValues($this->from_obj($creds->value, ''));
+                $credentialObj->setKeyboardType($this->from_obj($creds->keyboardType, 'default'));
+                $credentialObj->setSrc($this->from_obj($creds->src, ''));
+                $credentialObj->setWidth($this->from_obj($creds->width, ''));
+                $credentialObj->setHeight($this->from_obj($creds->height, ''));
+                $credentialObj->setAlt($this->from_obj($creds->alt, ''));
 
                 array_push($institutionCreds, $credentialObj);
             }
@@ -210,20 +210,20 @@ class BankStatement implements BankStatementsInterface
 
             $institutionObj = new Institution();
 
-            $institutionObj->setSlug($institution->slug != null ? $institution->slug : '');
-            $institutionObj->setName($institution->name != null ? $institution->name : '');
-            $institutionObj->setStatus($institution->status != null ? $institution->status : '');
-            $institutionObj->setSearchable($institution->searchable != null ? $institution->searchable : '');
-            $institutionObj->setDisplay($institution->display != null ? $institution->display : '');
-            $institutionObj->setSearchVal($institution->searchVal != null ? $institution->searchVal : '');
-            $institutionObj->setRegion($institution->region != null ? $institution->region : '');
-            $institutionObj->setExportWithPassword($institution->export_with_password != null ? $institution->export_with_password : '');
-            $institutionObj->setEstatementsSupported($institution->estatements_supported != null ? $institution->estatements_supported : '');
-            $institutionObj->setTransactionsListingsSupported($institution->transactions_listings_supported != null ? $institution->transactions_listings_supported : '');
-            $institutionObj->setRequiresPreload($institution->requires_preload != null ? $institution->requires_preload : '');
-            $institutionObj->setRequiresMfa($institution->requires_mfa != null ? $institution->requires_mfa : '');
-            $institutionObj->setUpdatedAt($institution->updated_at != null ? $institution->updated_at : '');
-            $institutionObj->setMaxDays($institution->max_days != null ? $institution->max_days : '');
+            $institutionObj->setSlug($this->from_obj($institution->slug, ''));
+            $institutionObj->setName($this->from_obj($institution->name, ''));
+            $institutionObj->setStatus($this->from_obj($institution->status, '0'));
+            $institutionObj->setSearchable($this->from_obj($institution->searchable, '0'));
+            $institutionObj->setDisplay($this->from_obj($institution->display, '0'));
+            $institutionObj->setSearchVal($this->from_obj($institution->searchVal, ''));
+            $institutionObj->setRegion($this->from_obj($institution->region, ''));
+            $institutionObj->setExportWithPassword($this->from_obj($institution->export_with_password, '0'));
+            $institutionObj->setEstatementsSupported($this->from_obj($institution->estatements_supported, '0'));
+            $institutionObj->setTransactionsListingsSupported($this->from_obj($institution->transactions_listings_supported, '0'));
+            $institutionObj->setRequiresPreload($this->from_obj($institution->requires_preload, '0'));
+            $institutionObj->setRequiresMfa($this->from_obj($institution->requires_mfa, '0'));
+            $institutionObj->setUpdatedAt($this->from_obj($institution->updated_at, '0'));
+            $institutionObj->setMaxDays($this->from_obj($institution->max_days, '0'));
 
 
 
