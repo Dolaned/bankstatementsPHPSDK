@@ -112,9 +112,11 @@ try {
 
 
     $australianBanks = $bank->listInstitutions("au");
-    
+
     echo "Banks in aus: <br>";
     echo $australianBanks->count();
+
+    echo '<pre>' . var_export($australianBanks, true) . '</pre>';
 
 } catch (ClientException $e) {
     echo $e->getMessage();

@@ -39,20 +39,57 @@ class InstitutionCredentials
 
     /**
      * InstitutionCredentials constructor.
-     * @param $name
-     * @param $fieldID
-     * @param $type
-     * @param $description
-     * @param $values
-     * @param $keyboardType
      */
-    public function __construct($name = null, $fieldID = null, $type = null, $description = null, $values = null, $keyboardType = null)
+    public function __construct()
+    {
+
+    }
+
+    /**
+     * @param null $name
+     */
+    public function setName($name)
     {
         $this->name = $name;
+    }
+
+    /**
+     * @param null $fieldID
+     */
+    public function setFieldID($fieldID)
+    {
         $this->fieldID = $fieldID;
+    }
+
+    /**
+     * @param null $type
+     */
+    public function setType($type)
+    {
         $this->type = $type;
+    }
+
+    /**
+     * @param null $description
+     */
+    public function setDescription($description)
+    {
         $this->description = $description;
+    }
+
+    /**
+     * @param null $values
+     */
+    public function setValues($values)
+    {
         $this->values = $values;
+    }
+
+    /**
+     * @param null $keyboardType
+     */
+    public function setKeyboardType($keyboardType)
+    {
         $this->keyboardType = $keyboardType;
     }
 

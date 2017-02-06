@@ -40,38 +40,126 @@ class Institution
 
     /**
      * Institutions constructor.
-     * @param $slug
-     * @param $name
-     * @param $credentials
-     * @param $status
-     * @param $searchable
-     * @param $display
-     * @param $searchVal
-     * @param $region
-     * @param $export_with_password
-     * @param $estatements_supported
-     * @param $transactions_listings_supported
-     * @param $requires_preload
-     * @param $requires_mfa
-     * @param $updated_at
-     * @param $max_days
      */
-    public function __construct($slug = null, $name = null, $credentials = null, $status = null, $searchable = null, $display = null, $searchVal = null, $region = null, $export_with_password = null, $estatements_supported = null, $transactions_listings_supported = null, $requires_preload = null, $requires_mfa = null, $updated_at = null, $max_days = null)
+    public function __construct(){}
+
+    /**
+     * @param null $slug
+     */
+    public function setSlug($slug)
     {
         $this->slug = $slug;
+    }
+
+    /**
+     * @param null $name
+     */
+    public function setName($name)
+    {
         $this->name = $name;
+    }
+
+    /**
+     * @param array|null $credentials
+     */
+    public function setCredentials($credentials)
+    {
         $this->credentials = $credentials;
+    }
+
+    /**
+     * @param null $status
+     */
+    public function setStatus($status)
+    {
         $this->status = $status;
+    }
+
+    /**
+     * @param null $searchable
+     */
+    public function setSearchable($searchable)
+    {
         $this->searchable = $searchable;
+    }
+
+    /**
+     * @param null $display
+     */
+    public function setDisplay($display)
+    {
         $this->display = $display;
+    }
+
+    /**
+     * @param null $searchVal
+     */
+    public function setSearchVal($searchVal)
+    {
         $this->searchVal = $searchVal;
+    }
+
+    /**
+     * @param null $region
+     */
+    public function setRegion($region)
+    {
         $this->region = $region;
+    }
+
+    /**
+     * @param null $export_with_password
+     */
+    public function setExportWithPassword($export_with_password)
+    {
         $this->export_with_password = $export_with_password;
+    }
+
+    /**
+     * @param null $estatements_supported
+     */
+    public function setEstatementsSupported($estatements_supported)
+    {
         $this->estatements_supported = $estatements_supported;
+    }
+
+    /**
+     * @param null $transactions_listings_supported
+     */
+    public function setTransactionsListingsSupported($transactions_listings_supported)
+    {
         $this->transactions_listings_supported = $transactions_listings_supported;
+    }
+
+    /**
+     * @param null $requires_preload
+     */
+    public function setRequiresPreload($requires_preload)
+    {
         $this->requires_preload = $requires_preload;
+    }
+
+    /**
+     * @param null $requires_mfa
+     */
+    public function setRequiresMfa($requires_mfa)
+    {
         $this->requires_mfa = $requires_mfa;
+    }
+
+    /**
+     * @param null $updated_at
+     */
+    public function setUpdatedAt($updated_at)
+    {
         $this->updated_at = $updated_at;
+    }
+
+    /**
+     * @param null $max_days
+     */
+    public function setMaxDays($max_days)
+    {
         $this->max_days = $max_days;
     }
 

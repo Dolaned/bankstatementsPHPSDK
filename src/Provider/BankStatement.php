@@ -174,7 +174,6 @@ class BankStatement implements BankStatementsInterface
 
         $content = $response->getBody();
 
-        //decode the json string.
         $json = json_decode($content);
 
         //check if json is null.
@@ -192,10 +191,46 @@ class BankStatement implements BankStatementsInterface
         foreach ($json->institutions as $institution) {
 
             foreach ($institution->credentials as $creds) {
-                array_push($institutionCreds, new InstitutionCredentials($creds->name, $creds->fieldID, $creds->type, $creds->description, $creds->values, $creds->keyboardType));
+
+                $credentialObj = new InstitutionCredentials();
+                $credentialObj->setName($creds->name != null ? $creds->name : '');
+                $credentialObj->setFieldID($creds->fieldID != null ? $creds->fieldID : '');
+                $credentialObj->setType($creds->type != null ? $creds->type : '');
+                $credentialObj->setDescription($creds->description != null ? $creds->description : '');
+                $credentialObj->setValues($creds->values != null ? $creds->values : '');
+                $credentialObj->setKeyboardType($creds->keyboardType != null ? $creds->keyboardType : 'default');
+                $credentialObj->setSrc($creds->src != null ? $creds->src : '');
+                $credentialObj->setWidth($creds->width != null ? $creds->width : '');
+                $credentialObj->setHeight($creds->height != null ? $creds->height : '');
+                $credentialObj->setAlt($creds->alt != null ? $creds->alt : '');
+
+                array_push($institutionCreds, $credentialObj);
             }
 
-            array_push($institutions, new Institution($institution->slug, $institution->name, $institutionCreds, $institution->status, $institution->searchable, $institution->display, $institution->searchVal, $institution->region, $institution->export_with_password, $institution->estatements_supported, $institution->transactions_listings_supported, $institution->requires_preload, $institution->requires_mfa, $institution->updated_at, $institution->max_days));
+
+            $institutionObj = new Institution();
+
+            $institutionObj->setSlug($institution->slug != null ? $institution->slug : '');
+            $institutionObj->setName($institution->name != null ? $institution->name : '');
+            $institutionObj->setStatus($institution->status != null ? $institution->status : '');
+            $institutionObj->setSearchable($institution->searchable != null ? $institution->searchable : '');
+            $institutionObj->setDisplay($institution->display != null ? $institution->display : '');
+            $institutionObj->setSearchVal($institution->searchVal != null ? $institution->searchVal : '');
+            $institutionObj->setRegion($institution->region != null ? $institution->region : '');
+            $institutionObj->setExportWithPassword($institution->export_with_password != null ? $institution->export_with_password : '');
+            $institutionObj->setEstatementsSupported($institution->estatements_supported != null ? $institution->estatements_supported : '');
+            $institutionObj->setTransactionsListingsSupported($institution->transactions_listings_supported != null ? $institution->transactions_listings_supported : '');
+            $institutionObj->setRequiresPreload($institution->requires_preload != null ? $institution->requires_preload : '');
+            $institutionObj->setRequiresMfa($institution->requires_mfa != null ? $institution->requires_mfa : '');
+            $institutionObj->setUpdatedAt($institution->updated_at != null ? $institution->updated_at : '');
+            $institutionObj->setMaxDays($institution->max_days != null ? $institution->max_days : '');
+
+
+
+
+            $institutionObj->setCredentials($institutionCreds != null ? $institutionCreds : '');
+
+            array_push($institutions, $institutionObj);
         }
         return new InstitutionCollection($institutions);
     }
