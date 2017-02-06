@@ -118,7 +118,7 @@ class BankStatement implements BankStatementsInterface
 
         //loop through accounts and add them to collection.
         foreach ($json->accounts as $account) {
-            $acc = new Account($account->accountType, $account->name, $account->accountNumber, $account->id, $account->bsb, $account->balance, $account->accountHolder, $account->available);
+            $acc = new Account($account->accountType, $account->name, $account->accountNumber, $account->id, $account->bsb, $account->balance, null, $account->available);
             $acc->setSlug($bankSlug);
             array_push($accounts, $acc);
         }

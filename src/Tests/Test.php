@@ -16,7 +16,7 @@ use BankStatement\Models\BankStatements\Request\StatementDataRequest;
 use BankStatement\Provider\BankStatement;
 use GuzzleHttp\Exception\ClientException;
 
-$bank = new BankStatement('', true);
+$bank = new BankStatement('GUQ2E1NVW13LC6KF1SFX834WSE0VEVISAVQQIZKZ', true);
 $loginCreds = new Login('bank_of_statements', '12345678', 'TestMyMoney');
 $userToken = null;
 $bankSlug = null;
@@ -112,6 +112,7 @@ try {
 
 
     $australianBanks = $bank->listInstitutions("au");
+    
     echo "Banks in aus: <br>";
     echo $australianBanks->count();
 
