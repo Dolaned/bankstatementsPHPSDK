@@ -11,15 +11,15 @@ namespace BankStatement\Models\BankStatements;
 
 class Account
 {
-    private $name;
-    private $slug;
-    private $accountNumber;
-    private $id;
-    private $bsb;
-    private $balance;
-    private $available;
-    private $accountHolder;
-    private $accountType;
+    public $name;
+    public $slug;
+    public $accountNumber;
+    public $id;
+    public $bsb;
+    public $balance;
+    public $available;
+    public $accountHolder;
+    public $accountType;
 
 
     /**

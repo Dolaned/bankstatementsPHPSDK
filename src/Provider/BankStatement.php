@@ -82,7 +82,8 @@ class BankStatement implements BankStatementsInterface
     /**
      * @param Login $login
      * @param $userToken
-     * @return array[$userToken, AccountCollection]
+     * @return array [$userToken, AccountCollection]
+     * @throws APIErrorException
      * @throws EmptyJsonStringException
      * @throws ErrorCodeException
      */
@@ -91,7 +92,7 @@ class BankStatement implements BankStatementsInterface
         $response = null;
         //means no preload attempt has been made, continue with logging in normally.
 
-        try{
+        try {
             if ($userToken == null) {
                 $response = $this->guzzleClient->request('POST', 'login', ['body' => json_encode($login->toJSON())]);
             } else {
@@ -99,17 +100,20 @@ class BankStatement implements BankStatementsInterface
             }
         } catch (ClientException $e) {
 
-
             if ($e->getResponse()->getStatusCode() == 400) {
 
                 $content = $e->getResponse()->getBody()->getContents();
                 $body = json_decode($content);
 
-                throw new APIErrorException($body->error,$body->errorCode);
+                throw new APIErrorException($body->error, $body->errorCode);
+            } else if ($e->getResponse()->getStatusCode() == 404) {
+                $content = $e->getResponse()->getBody()->getContents();
+                $body = json_decode($content);
+
+                throw new APIErrorException($body->error, $body->errorCode);
             }
 
         }
-
 
         //get the body content.
         $content = $response->getBody();
@@ -243,8 +247,6 @@ class BankStatement implements BankStatementsInterface
             $institutionObj->setMaxDays($this->from_obj($institution->max_days, '0'));
 
 
-
-
             $institutionObj->setCredentials($institutionCreds != null ? $institutionCreds : '');
 
             array_push($institutions, $institutionObj);
@@ -302,17 +304,17 @@ class BankStatement implements BankStatementsInterface
     {
 
         //Set the file name.
-        $zipName = $userToken."_".'temp.zip';
+        $zipName = $userToken . "_" . 'temp.zip';
         $folder = "Storage/Statements/";
-        $zipLocation = $folder.$zipName;
+        $zipLocation = $folder . $zipName;
 
 
         $this->guzzleClient->request('GET', 'files',
-            ['headers' => array('X-USER-TOKEN' => $userToken), 'Content-Type' => 'application/x-zip', 'sink'=> $zipName]);
+            ['headers' => array('X-USER-TOKEN' => $userToken), 'Content-Type' => 'application/x-zip', 'sink' => $zipName]);
 
         header('Content-Description: File Transfer');
         header('Content-Type: application/x-zip');
-        header('Content-Disposition: attachment; filename='.basename($zipName));
+        header('Content-Disposition: attachment; filename=' . basename($zipName));
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
         header('Cache-Control: must-revalidate');
@@ -644,8 +646,9 @@ class BankStatement implements BankStatementsInterface
         return $statements;
     }
 
-    function from_obj(&$type,$default = "") {
-        return isset($type)? $type : $default;
+    function from_obj(&$type, $default = "")
+    {
+        return isset($type) ? $type : $default;
     }
 
     public function getLatestJsonError()
