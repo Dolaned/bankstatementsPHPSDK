@@ -8,6 +8,7 @@
 
 namespace BankStatement\Provider;
 
+use BankStatement\Exception\APIErrorException;
 use BankStatement\Exception\EmptyJsonStringException;
 use BankStatement\Exception\ErrorCodeException;
 use BankStatement\Exception\NoAccountsException;
@@ -31,6 +32,7 @@ use BankStatement\Models\BankStatements\Response\Transaction;
 use BankStatement\Models\BankStatements\Response\TransactionCollection;
 use BankStatement\Models\Interfaces\BankStatementsInterface;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class BankStatement implements BankStatementsInterface
 {
@@ -88,11 +90,26 @@ class BankStatement implements BankStatementsInterface
     {
         $response = null;
         //means no preload attempt has been made, continue with logging in normally.
-        if ($userToken == null) {
-            $response = $this->guzzleClient->request('POST', 'login', ['body' => json_encode($login->toJSON())]);
-        } else {
-            //TODO preloader stuff here.
+
+        try{
+            if ($userToken == null) {
+                $response = $this->guzzleClient->request('POST', 'login', ['body' => json_encode($login->toJSON())]);
+            } else {
+                //TODO preloader stuff here.
+            }
+        } catch (ClientException $e) {
+
+
+            if ($e->getResponse()->getStatusCode() == 400) {
+
+                $content = $e->getResponse()->getBody()->getContents();
+                $body = json_decode($content);
+
+                throw new APIErrorException($body->error,$body->errorCode);
+            }
+
         }
+
 
         //get the body content.
         $content = $response->getBody();
@@ -625,6 +642,10 @@ class BankStatement implements BankStatementsInterface
         }
 
         return $statements;
+    }
+
+    function from_obj(&$type,$default = "") {
+        return isset($type)? $type : $default;
     }
 
     public function getLatestJsonError()

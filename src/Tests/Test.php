@@ -31,7 +31,7 @@ try {
 
     echo '<br/>';
     echo '<br/>';
-    $firstAccount = $accountCollection->get(1);
+    $firstAccount = $accountCollection->get(0);
     echo 'Acc Name: ' . $firstAccount->getName();
     echo '<br/>';
 
@@ -42,6 +42,8 @@ try {
     echo 'Acc No: ' . $firstAccount->getAccountNumber();
     echo '<br/>';
     echo 'Acc Balance: ' . $firstAccount->getBalance();
+    echo '<br/>';
+    echo 'Acc Available: ' . $firstAccount->getAvailable();
 
     echo '<br/>';
     echo 'Account Holder: ' . $firstAccount->getAccountHolder();
@@ -58,6 +60,7 @@ try {
 
 
     echo 'Account Holder ' . $statements->first()->getAccountHolder();
+    echo '<br/>';
     echo '<br/>';
     echo '<br/>';
 
@@ -110,13 +113,14 @@ try {
     echo $bank->logout(new Logout($userToken));
 
 
-
+    /*
     $australianBanks = $bank->listInstitutions("au");
 
     echo "Banks in aus: <br>";
     echo $australianBanks->count();
 
     echo '<pre>' . var_export($australianBanks, true) . '</pre>';
+    */
 
 } catch (ClientException $e) {
     echo $e->getMessage();
